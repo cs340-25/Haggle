@@ -10,4 +10,4 @@
 - Create stylized offline game
 - Create leaderboard component, with and without user sign-in
 - Allow users to “join” games that aren’t actually games, just pages
-- Create developer page for crude displaying, creation, and deletion of user and session models |
+- Create developer page for crude displaying, creation, and deletion of user and session models
