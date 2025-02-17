@@ -1,4 +1,3 @@
-import SimpleUser from "@/app/components/SimpleUser";
 import NavBar from "./components/NavBar";
 
 export default function Home() {
@@ -7,7 +6,6 @@ export default function Home() {
       <NavBar />
       
       <p>Welcome to the root page</p>
-      <SimpleUser />
     </div>
   );
 }
