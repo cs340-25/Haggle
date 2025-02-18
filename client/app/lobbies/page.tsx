@@ -1,4 +1,5 @@
-import NavBar from "./components/NavBar";
+import LobbyCrud from "../components/LobbyCrud";
+import NavBar from "../components/NavBar";
 
 export default function Home() {
   return (
@@ -6,6 +7,8 @@ export default function Home() {
       <NavBar />
       
       <p className="mt-[100px]">Welcome to the root page</p>
+
+      <LobbyCrud />
     </div>
   );
 }

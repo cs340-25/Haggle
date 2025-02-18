@@ -54,23 +54,27 @@ Here are the planned functionalities for the different routes:
 We'll be using Sequelize as the ORM, but here's the lobby model:
 
 > <hr>
-> <h3>Game</h3>
+> <h3>Lobby</h3>
 >
 > | Field | Datatype | Constraints | Justification |
 > | -------- | ------- | ------- | ----- |
-> | `gameCode` | `string` | unique, required | Needed for API and page access |
-> | `numPlayers` | `number` | required | Number of players in game |
+> | `code` | `string` | unique, required | Needed for API and page access |
+> | `numPlayers` | `number` | required | Number of players in lobby |
 > | `private` | `boolean` | required | Restrict "random play" button search |
-> | `state` | `string` | required, CANNOT be empty | Current state of game |
+> | `state` | `string` | required, CANNOT be empty | Current state of lobby |
 
 
 ### iii. API Routes
 
-- `/games`
-    - randomly join existing public game
+- `/lobbies`
+    - GET for getting all public lobbies
+    - POST for creating a new lobby
 
-- `/games/gameCode`
-    - join *any* game given code
+- `/lobbies/gameCode`
+    - join *any* lobby given code
+    - GET for getting state of lobby
+    - PUT for updating state of lobby OR updating number of players
+    - DELETE for deleting a lobby
 
 > [!NOTE]
 > More details regarding communication between the websocket server and
