@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { ILobby } from '@/app/server/models/lobby';
 import Image from 'next/image';
+import { addLobby, getLobbyByID, getPublicLobbies, rmLobby, updateLobby } from '../utils/lobbyAPI';
 
 
 const LobbyCrud = () => {
@@ -10,14 +11,8 @@ const LobbyCrud = () => {
     const [lobbies, setLobbies] = useState<ILobby[]>([]);
 
     async function refreshLobbies() {
-        const initRes = await fetch("/api/lobbies", {
-            method: "GET",
-            cache: "no-cache"
-        });
-
-        const initData: ILobby[] = await initRes.json();
-
-        setLobbies(initData);
+        const initData = await getPublicLobbies();
+        setLobbies(initData ?? []);
     }
 
     useEffect(() => { refreshLobbies() }, []);
@@ -28,7 +23,8 @@ const LobbyCrud = () => {
     const [inputPrivate, setInputPrivate] = useState<boolean>(false);
     const [inputState, setInputState] = useState<string>("");
     
-    async function addLobby() {
+    // Unholy amalgamation of form-to-API functions
+    async function addLobbyCRUD() {
         if (inputCode == "" || inputNumPlayers == "" || inputState == "") {
             alert("You must provide each field for this!");
             return;
@@ -41,15 +37,12 @@ const LobbyCrud = () => {
             state: inputState
         };
 
-        let postRes = await fetch("/api/lobbies", {
-            method: "POST",
-            body: JSON.stringify(newLobby)
-        });
+        await addLobby(newLobby);
 
         refreshLobbies();
     }
 
-    async function updateLobby() {
+    async function updateLobbyCRUD() {
         if (inputCode == "") {
             alert("You must provide a code for this!");
             return;
@@ -62,37 +55,28 @@ const LobbyCrud = () => {
             state: inputState
         };
 
-        const postRes = await fetch(`/api/lobbies/${newLobby.code}`, {
-            method: "PUT",
-            body: JSON.stringify(newLobby)
-        });
+        await updateLobby(newLobby);
 
         refreshLobbies();
     }
 
-    async function getLobby() {
+    async function getLobbyCRUD() {
         if (inputCode == "") {
             alert("You must provide a code for this!");
             return;
         }
 
-        const getRes = await fetch(`/api/lobbies/${inputCode}`, {
-            method: "GET",
-        });
+        const lobby = await getLobbyByID(inputCode);
 
-        if (getRes.status == 200) {
-            const lobby: ILobby = await getRes.json();
+        if (lobby != undefined) {
             setInputNumPlayers(lobby.numPlayers.toString());
             setInputPrivate(lobby.private);
             setInputState(lobby.state);
         }
     }
 
-    async function rmLobby(rmCode: string) {
-        const getRes = await fetch(`/api/lobbies/${rmCode}`, {
-            method: "DELETE",
-        });
-
+    async function rmLobbyCRUD(code: string) {
+        rmLobby(code);
         refreshLobbies();
     }
     
@@ -145,21 +129,21 @@ const LobbyCrud = () => {
                 </div>
 
                 <button
-                    onClick={() => addLobby()}
+                    onClick={() => addLobbyCRUD()}
                     className="mt-10 px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
                 >
                     POST
                 </button>
 
                 <button
-                    onClick={() => updateLobby()}
+                    onClick={() => updateLobbyCRUD()}
                     className="mt-5 px-5 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg"
                 >
                     PUT
                 </button>
 
                 <button
-                    onClick={() => getLobby()}
+                    onClick={() => getLobbyCRUD()}
                     className="mt-5 px-5 py-2 bg-green-600 hover:bg-green-700 rounded-lg"
                 >
                     GET
@@ -177,7 +161,7 @@ const LobbyCrud = () => {
 
                         <button
                             className='absolute top-[50%] -translate-y-[50%] right-[5%] opacity-65 hover:opacity-100'
-                            onClick={() => { rmLobby(lobby.code) }}
+                            onClick={() => { rmLobbyCRUD(lobby.code) }}
                         >
                             <Image 
                                 src="/trash.svg"
