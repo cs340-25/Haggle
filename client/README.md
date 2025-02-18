@@ -6,9 +6,20 @@ server.
 
 ## How to use
 
-First, contact me for the `.env.local` file and add it to the root directory of the project.
+1. Download and install both the MySQL Community Server and MySQL Shell.
 
-Then, simply install the necessary packages and run the dev command:
+2. Start the server and create a user (most likely root).
+
+3. Create a database for the project and add the corresponding `.env.local` variables:
+
+```
+MYSQL_BASE="databaseName"
+MYSQL_USER="username"
+MYSQL_PASS="password"
+MYSQL_URL="localhost"
+```
+
+4. Then, simply install the necessary packages and run the dev command:
 ```
 pnpm i
 pnpm dev
