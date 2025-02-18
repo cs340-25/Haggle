@@ -6,6 +6,9 @@ export default function Home() {
       <NavBar />
       
       <p className="mt-[100px]">Welcome to the root page</p>
+
+      {/* <img src="/chip.svg" ></img> */}
+
     </div>
   );
 }
