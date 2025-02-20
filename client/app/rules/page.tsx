@@ -12,7 +12,7 @@ const page = () => {
         </div>
         <hr style={{color:"#FFFFFF", minWidth:"75%", minHeight:"20px"}}></hr>
         <div className="bg-[#1b4381] w-[75%] rounded-[20px] border-[#5c6ead] border-2">
-          <div className='text-center text-[20px] p-[5%] text-[#ffdebd] font-black '>
+          <div className='text-center text-[24px] p-[5%] text-[#ffdebd] font-black '>
           <span className='text-6xl'>How to Play </span>
           <br></br><br></br>
           <span className='text-4xl'>The Auction Stage:</span>
