@@ -1,6 +1,7 @@
 import Image from "next/image";
 import NavBar from "./components/NavBar";
 import HaggleChip from "@/public/chip.svg";
+import HostButton from "./components/HostButton";
 
 
 export default function Home() {
@@ -24,7 +25,7 @@ export default function Home() {
           <button className="bg-[#1b4381] p-[2vh] px-[3vw] rounded-[30px] border-[.5vh] border-[#5c6ead]">Join</button>
           <input type="text" placeholder="Enter Join Code" className="peer bg-[#1b4381] p-[2vh] rounded-[30px] border-[.5vh] border-[#5c6ead] text-[2vw] text-[#ffdebd]"/>
         </div>
-        <button className="bg-[#1b4381] p-[2vh] px-[3vw] rounded-[30px] border-[.5vh] border-[#5c6ead]">Host</button>
+        <HostButton />
       </div>
 
     </div>

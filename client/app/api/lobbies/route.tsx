@@ -1,6 +1,7 @@
 import { sqlConnect } from "@/app/server/connection";
 import { ILobby, Lobby } from "@/app/server/models/lobby";
 import { NextRequest, NextResponse } from "next/server";
+import { Model } from "sequelize";
 
 
 export async function GET(req: NextRequest) {
@@ -15,14 +16,31 @@ export async function GET(req: NextRequest) {
 	*/
 
 	console.log("lobbies got a GET request!");
+    
+    const include_private = req?.nextUrl?.searchParams.get('private');
+	if (include_private != "true" && include_private != "false") {
+		return new NextResponse(JSON.stringify({
+			error: "Must specify whether to include private lobbies."
+		}), {
+			status: 400
+		});
+	}
+	const private_bool = include_private == "true";
 
     await sqlConnect.authenticate();
     await Lobby.sync();
 
 	try {
-		const result = await Lobby.findAll({where: {
-            private: false
-        }});
+		let result: Model<any, any>[]
+
+		if (private_bool) {
+			result = await Lobby.findAll({});
+		} else {
+			result = await Lobby.findAll({where: {
+				private: private_bool
+			}});
+		}
+
 		return new NextResponse(JSON.stringify(result), {
 			status: 200
 		});
