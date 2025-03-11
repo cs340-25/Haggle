@@ -46,6 +46,7 @@ class ActCard extends InActCard{
         return new InActCard(this.suit, this.val, this.frame);
     }
 
+    //Allows Cards to be Clicked & Dragged
     onClicked(mouse:Phaser.Input.Pointer){
 
         let clicked:boolean = false;
@@ -55,20 +56,13 @@ class ActCard extends InActCard{
                 
                 if(mouse.y >= this.sprite.y - (cardHigh/2) && mouse.y <= this.sprite.y + (cardHigh/2)){
                     this.sprite.setPosition(mouse.x,mouse.y);
-                    
-                    this.clicked = true;
-                }else{
-                    this.clicked = false;
+                    clicked = true;
                 }
-
-            }else{
-                this.clicked = false;
             }
-
-        }else{
-            this.clicked = false;
         }
 
+        //updates
+        this.clicked = clicked;
     }
 }
 
@@ -89,8 +83,26 @@ class CardPlace extends InActCard{
         this.CardPlaced = false;
         this.TopLeft = [xPos-cardWid/2,yPos-cardHigh/2];
         this.BotRight = [xPos+cardWid/2,yPos+cardHigh/2];
-
     }
+
+    //returns true if the given card overlaps with the CardPad & has been not clicked otherwise returns false
+    CardPlaceCheck(curCard:ActCard){
+
+        //Hover Over cardPad check
+        if(curCard.clicked == true) return false;
+
+        //This is the collision check
+        if(this.TopLeft[0] <= curCard.sprite.x && this.BotRight[0] >= curCard.sprite.x){
+
+            if(this.TopLeft[1] <= curCard.sprite.y && this.BotRight[1] >= curCard.sprite.y){
+                console.log("Condition met");
+                return true;
+            } 
+        }
+
+        return false;
+    }
+    
 }
 
 //Variables
@@ -100,7 +112,7 @@ let right = true;
 let justClicked = false;
 
 //
-let cardPad:CardPlace | undefined; //This is where played cards are placed
+let cardPad:CardPlace; //This is where played cards are placed
 
 //let showCard:Phaser.GameObjects.Image;
 //Important Arrays
@@ -116,28 +128,6 @@ export default class GameScene extends Phaser.Scene{
     constructor(){
         super({key:'GameScene'});
     };
-
-    //returns true if the given card overlaps with the CardPad & has been not clicked otherwise returns false
-    CardPlaceCheck(curCard:ActCard){
-
-        //returns false if pad hasnt been initalized (should never occur)
-        if(cardPad == undefined) return false;
-
-        //Hover Over cardPad check
-        if(curCard.clicked == true) return false;
-
-        //This is the collision check
-        if(cardPad.TopLeft[0] <= curCard.sprite.x && cardPad.BotRight[0] >= curCard.sprite.x){
-
-            if(cardPad.TopLeft[1] <= curCard.sprite.y && cardPad.BotRight[1] >= curCard.sprite.y){
-                console.log("Condition met");
-                return true;
-            } 
-        }
-
-        return false;
-    }
-
 
 //Card object | Suits: 0=club, 1=dia, 2=spade, 3=heart
 //Creates an array of InActive cards for each card within a traditional deck
@@ -199,38 +189,6 @@ export default class GameScene extends Phaser.Scene{
         return newCard;
     }
 
-
-//Allows Cards to be Clicked & Dragged
-    OnCardClick(inptCard:ActCard){
-
-        if(mouse.isDown){
-
-            if(mouse.x >= inptCard.sprite.x - (cardWid/2) && mouse.x <= inptCard.sprite.x + (cardWid/2)){
-                
-                if(mouse.y >= inptCard.sprite.y - (cardHigh/2) && mouse.y <= inptCard.sprite.y + (cardHigh/2)){
-                    inptCard.sprite.setPosition(mouse.x,mouse.y);
-                    inptCard.clicked = true;
-                }else{
-                    inptCard.clicked = false;
-                }
-
-            }else{
-                inptCard.clicked = false;
-            }
-
-        }else{
-            inptCard.clicked = false;
-        }
-
-
-        //This is a selected Card position check
-        if(inptCard.clicked == true){
-            console.log("CurCard x: " + inptCard.sprite.x + " CurCard y: " +inptCard.sprite.y);
-        }
-
-    }
-
-
 //Deals the Player's Hand
     DealPlayerHand(){
 
@@ -271,10 +229,11 @@ export default class GameScene extends Phaser.Scene{
         //Player Hand Updates
         //Updates Cards in Player Hand
         for(let i = 0; i < playerHand.length; i++){
-            this.OnCardClick(playerHand[i]);
+            //this.OnCardClick(playerHand[i]);
+            playerHand[i].onClicked(mouse);
 
             //Checks if current card has been Played
-            if(this.CardPlaceCheck(playerHand[i])){
+            if(cardPad.CardPlaceCheck(playerHand[i])){
 
                 console.log("Did the Thing");
 
