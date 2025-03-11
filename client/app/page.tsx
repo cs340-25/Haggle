@@ -15,7 +15,7 @@ export default function Home() {
           height={900}
           alt="Haggle Logo"
         />
-        <button className="absolute bottom-[19%] xxs:bottom-[22%] xs:bottom-[25%] left-[50%] -translate-x-[50%] bg-[#1b4381] pl-[1vh] pr-[1vh] xs:rounded-[25px] xxs:rounded-[10px] border-[.5vh] border-[#5c6ead]">Offline</button>
+        <a className="absolute bottom-[19%] xxs:bottom-[22%] xs:bottom-[25%] left-[50%] -translate-x-[50%] bg-[#1b4381] pl-[1vh] pr-[1vh] xs:rounded-[25px] xxs:rounded-[10px] border-[.5vh] border-[#5c6ead]" href="/offline">Offline</a>
       </div>
 
       <div className="flex flex-col xxs:gap-3 xs:gap-10 sm:flex-row sm:gap-0 mt-12 sm:mt-0 justify-between items-center min-w-[90%] xs:text-[3vw] xxs:text-[7vw] text-[#ffdebd]">
