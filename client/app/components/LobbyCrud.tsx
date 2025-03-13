@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { ILobby } from '@/app/server/models/lobby';
 import Image from 'next/image';
-import { addLobby, getLobbyByID, getPublicLobbies, rmLobby, updateLobby } from '../utils/lobbyAPI';
+import { addLobby, getAllLobbies, getLobbyByID, rmLobby, updateLobby } from '../utils/lobbyAPI';
 
 
 const LobbyCrud = () => {
@@ -11,7 +11,7 @@ const LobbyCrud = () => {
     const [lobbies, setLobbies] = useState<ILobby[]>([]);
 
     async function refreshLobbies() {
-        const initData = await getPublicLobbies();
+        const initData = await getAllLobbies();
         setLobbies(initData ?? []);
     }
 
@@ -76,7 +76,7 @@ const LobbyCrud = () => {
     }
 
     async function rmLobbyCRUD(code: string) {
-        rmLobby(code);
+        await rmLobby(code);
         refreshLobbies();
     }
     
