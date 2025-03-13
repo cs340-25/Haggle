@@ -1,7 +1,7 @@
 import React from 'react';
 import NavBar from '../components/NavBar';
 import GameOff from '../components/game_comps/GameOff';
-import GameServer from '../components/GameServer';
+// import GameServer from '../components/GameServer';
 
 const page = () => {
   return (
@@ -15,8 +15,8 @@ const page = () => {
         <div className="bg-[#1b4381] w-[75vw] rounded-[20px] border-[#5c6ead] border-2">
           
         </div>
-        <div className='h-[50%] text-[100px]'><br></br></div>
         <GameOff/>
+        <div className='h-[50%] text-[100px]'><br></br></div>
     </div>
   )
 }
