@@ -8,7 +8,6 @@ const GameOff : React.FC = () =>{
     const gameRef = useRef<Phaser.Game | null>(null);
     
     useEffect(() =>{
-
         const config:Phaser.Types.Core.GameConfig = {
             type: Phaser.AUTO,
             width: 800,
