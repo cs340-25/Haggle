@@ -21,29 +21,20 @@ the necessary instructions there to run the corresponding service!
 Here are the planned functionalities for the different routes:
 
 - `/`
-    - nav bar to `/play`, `/rules`, and `/`
-    - invite player to sign in
-    - about
+    - nav bar to `/` and `/rules`
+    - nav bar includes About button that pulls up modal
+    - haggle coin in center allows for offline play
+    - user can play online
+        - join existing lobby
+            - use code to join directly
+            - join a random lobby with a button
+        - host a new lobby
+            - adds lobby to database
 
 - `/rules`
-    - nav bar to `/play`, `/rules`, and `/`
+    - nav bar to `/` and `/rules`
     - explains the game
         - plenty of visuals?
-
-- `/play`
-    - nav bar to `/play`, `/rules`, and `/`
-    - can play offline OR online w/o signing in
-        - playing online w/o signing in doesn't update leaderboard
-        - user can set anonymous username with sessionStorage API
-    - public leaderboards
-    - if signed in, show where they are in leaderboard
-    - show games to play as a vertical list
-        - hyperlink elements link to `/play/online/[gameTitle]`
-            - display number of users already in game
-            - display title of the game room
-        - reload button
-    - create new game button
-        - opens form that takes in gameTitle
 
 - `/play/offline`
     - user can play a game locally
@@ -51,7 +42,8 @@ Here are the planned functionalities for the different routes:
     - disconnect button in bottom right corner
     - <b>single player should be implemented first</b>
 
-- `/play/online/[gameTitle]`
+- `/play/online/[gameCode]`
+    - `gameCode` is UNIQUE, case-insensitive string of 6 letters (a-z)
     - use can play a game online
     - game screen should take up most of the area
     - disconnect button in bottom right corner
@@ -59,39 +51,30 @@ Here are the planned functionalities for the different routes:
 
 ### ii. Models
 
-We'll be using Sequelize as the ORM, but here's the models:
+We'll be using Sequelize as the ORM, but here's the lobby model:
 
 > <hr>
-> <h3>User</h3>
+> <h3>Lobby</h3>
 >
 > | Field | Datatype | Constraints | Justification |
 > | -------- | ------- | ------- | ----- |
-> | `username` | `string` | unique, required | The display name during games |
-> | `email` | `string` | unique, required | Needed for Auth0-based lookups |
-> | `whitelist_default` | `User[]` | required, can be empty | Allow certain users private games by default |
-<br>
-
-
-> <hr>
-> <h3>Game</h3>
->
-> | Field | Datatype | Constraints | Justification |
-> | -------- | ------- | ------- | ----- |
-> | `gameTitle` | `string` | unique, required | Needed for API and page access |
-> | `players` | `string` | required, can be empty | Signed in players to update after game |
-> | `numPlayers` | `number` | required | Number of players in game |
-> | `private` | `bool` | required | If true, only allows signed in, whitelisted players |
-> | `whitelist` | `User[]` | can be empty | Allow certain users private games by default |
-> | `state` | `string` | required, CANNOT be empty | Current state of game |
+> | `code` | `string` | unique, required | Needed for API and page access |
+> | `numPlayers` | `number` | required | Number of players in lobby |
+> | `private` | `boolean` | required | Restrict "random play" button search |
+> | `state` | `string` | required, CANNOT be empty | Current state of lobby |
 
 
 ### iii. API Routes
 
-- `/users`
-    - public leaderboard users
+- `/lobbies`
+    - GET for getting all public lobbies
+    - POST for creating a new lobby
 
-- `/games?allow_full=false`
-    - search for existing games online
+- `/lobbies/gameCode`
+    - join *any* lobby given code
+    - GET for getting state of lobby
+    - PUT for updating state of lobby OR updating number of players
+    - DELETE for deleting a lobby
 
 > [!NOTE]
 > More details regarding communication between the websocket server and
