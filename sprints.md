@@ -17,9 +17,26 @@
     - you will need to create a client side NextJS component with useState() to track text-based input
 
 ## Sprint 3
-- Have submit button of host modal form send user to `/play/online/{code}` with randomly generated code
-- Have two states for `/play/online/{code}`
-    - if lobby DNE, show crude "game DNE" display
-    - if lobby exists and only has 1 player (you), show a crude "waiting..." display
-    - if lobby has both players, show a crude "game starting" display
-- 
+# Sprints Outline
+
+## Sprint 1
+- Create basic layout for rules and landing page
+- Create basic layout for play page
+- Create API routes for lobbies and users
+- Begin prototype of offline game
+
+## Sprint 2
+- Continue prototype of offline game
+- Properly stylize rules and landing page (with haggle assets, too!)
+- Properly stylize play page (with haggle assets, too!)
+- Create developer page for crude creating, reading, updating and deleting (CRUD) of user and session models
+
+## Sprint 3
+- Finish prototype of offline game
+- Visiting `/online/{code}` should automatically add you to the lobby
+    - leaving should remove you from the lobby
+    - if you're the last to leave, delete the lobby
+    - if the lobby is full, redirect to home page
+- Create stylized placeholder for `/online/{code}`
+- Clicking the random button should redirect you to a random, non-full public lobby
+    - Hosting using the host modal should direct you to the proper `/online/{code}`
