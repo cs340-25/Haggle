@@ -4,6 +4,7 @@ import NavBar from "./components/NavBar";
 import HaggleChip from "@/public/chip.svg";
 import React, { useState } from 'react';
 import HostButton from "./components/HostButton";
+import RandomButton from "./components/RandomButton";
 
 export default function Home() {
 
@@ -34,7 +35,7 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col xxs:gap-3 xs:gap-10 sm:flex-row sm:gap-0 mt-12 sm:mt-0 justify-between items-center min-w-[90%] xs:text-[3vw] xxs:text-[7vw] text-[#ffdebd]">
-        <button className="bg-[#1b4381] p-[2vh] px-[3vw] xs:rounded-[30px] xxs:rounded-[20px] border-[.5vh] border-[#5c6ead]">Random</button>
+        <RandomButton />
         
         <div className="flex gap-[3vw]">
           <button className="bg-[#1b4381] p-[2vh] px-[3vw] xs:rounded-[30px] xxs:rounded-[20px] border-[.5vh] xxs:text-[7vw] xs:text-[3vw] border-[#5c6ead]" onClick={handleJoin} >Join</button>
