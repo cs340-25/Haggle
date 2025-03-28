@@ -6,9 +6,8 @@ const NavBar = () => {
         <a href="/" className='hidden xxs:block'><b>Haggle</b></a>
         <div className='flex justify-between w-full xxs:w-fit xxs:justify-start gap-5'>
           <a href="/" className='block xxs:hidden'>Haggle</a>
-          <a href="/testing">Testing</a>
-          <a href="/lobbies">Lobbies</a>
           <a href="/rules">Rules</a>
+          <a href="/play">Play</a>
         </div>
     </div>
   )

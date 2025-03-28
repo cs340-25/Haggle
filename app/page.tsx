@@ -3,8 +3,6 @@ import Image from "next/image";
 import NavBar from "./components/NavBar";
 import HaggleChip from "@/public/chip.svg";
 import React, { useState } from 'react';
-import HostButton from "./components/HostButton";
-import RandomButton from "./components/RandomButton";
 
 export default function Home() {
 
@@ -34,15 +32,19 @@ export default function Home() {
         <a className="absolute bottom-[19%] xxs:bottom-[22%] xs:bottom-[25%] left-[50%] -translate-x-[50%] bg-[#1b4381] pl-[1vh] pr-[1vh] xs:rounded-[25px] xxs:rounded-[10px] border-[.5vh] border-[#5c6ead]" href="/offline">Offline</a>
       </div>
 
-      <div className="flex flex-col xxs:gap-3 xs:gap-10 sm:flex-row sm:gap-0 mt-12 sm:mt-0 justify-between items-center min-w-[90%] xs:text-[3vw] xxs:text-[7vw] text-[#ffdebd]">
-        <RandomButton />
-        
-        <div className="flex gap-[3vw]">
-          <button className="bg-[#1b4381] p-[2vh] px-[3vw] xs:rounded-[30px] xxs:rounded-[20px] border-[.5vh] xxs:text-[7vw] xs:text-[3vw] border-[#5c6ead]" onClick={handleJoin} >Join</button>
-          <input type="text" placeholder="Enter Join Code" className="peer bg-[#1b4381] p-[2vh] xs:rounded-[30px] xxs:rounded-[20px] border-[.5vh] border-[#5c6ead] xs:text-[3vw] xxs:text-[4vw] text-[#ffdebd]" onChange={(e) => {handleInputChange(e.target.value)}}/>
-        </div>
+      <div className="flex flex-col xxs:gap-3 xs:gap-10 sm:flex-row sm:gap-[20vw] mt-12 sm:mt-0 justify-center items-center min-w-[90%] xs:text-[3vw] xxs:text-[7vw] text-[#ffdebd]">
 
-        <HostButton />
+        <a
+          className="bg-[#1b4381] p-[2vh] px-[3vw] xs:rounded-[30px] xxs:rounded-[20px] border-[.5vh] xxs:text-[7vw] xs:text-[3vw] border-[#5c6ead] hover:bg-[#244c89]"
+          href="/rules"
+        >Rules</a> 
+        <a
+          className="bg-[#1b4381] p-[2vh] px-[3vw] xs:rounded-[30px] xxs:rounded-[20px] border-[.5vh] xxs:text-[7vw] xs:text-[3vw] border-[#5c6ead] hover:bg-[#244c89]"
+          href="/play"
+        >Play</a>        
+        {/* <div className="flex gap-[3vw]">
+          <input type="text" placeholder="Enter Join Code" className="peer bg-[#1b4381] p-[2vh] xs:rounded-[30px] xxs:rounded-[20px] border-[.5vh] border-[#5c6ead] xs:text-[3vw] xxs:text-[4vw] text-[#ffdebd]" onChange={(e) => {handleInputChange(e.target.value)}}/>
+        </div> */}
       </div>
     </div>
   );
