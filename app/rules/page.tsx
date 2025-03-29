@@ -2,7 +2,6 @@ import React from 'react';
 import NavBar from '../components/NavBar';
 import Image from "next/image";
 import HaggleChip from "@/public/chip.svg";
-import GameServer from '../components/GameServer';
 
 const page = () => {
   return (
@@ -40,7 +39,7 @@ const page = () => {
           Ace is valued at 1, unless against a face card at which point it is treated as 14<br></br>
           Face cards are valued as follows: Jack = 11, Queen = 12, King = 13<br></br>
           During Haggling, Ace is treated as a 1<br></br>
-          In the event of 2 cards with the same value being played the greater suit will win. (Club > Diamond > Spade > Heart)<br></br>
+          In the event of 2 cards with the same value being played the greater suit will win. (Club &gt; Diamond &gt; Spade &gt; Heart)<br></br>
           </div>
         </div>
         <div className='h-[50%] text-[10vh]'><br></br></div>

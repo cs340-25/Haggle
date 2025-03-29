@@ -1,22 +1,9 @@
-"use client";
 import Image from "next/image";
 import NavBar from "./components/NavBar";
 import HaggleChip from "@/public/chip.svg";
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function Home() {
-
-  const [code, setCode] = useState(""); // State for storing join code
-
-  // recognize text while type
-  function handleInputChange(e: string) {
-    setCode(e);
-  }
-
-  // onJoinButtonClick?
-  function handleJoin() { 
-    window.location.href = "play/online/" + code;
-  }
 
   return (
     <div className="w-[100%] min-h-[100vh] flex flex-col sm:justify-between pb-10 items-center gap-5 relative bg-[#1d4325] font-impact font-black">
@@ -41,10 +28,7 @@ export default function Home() {
         <a
           className="bg-[#1b4381] p-[2vh] px-[3vw] xs:rounded-[30px] xxs:rounded-[20px] border-[.5vh] xxs:text-[7vw] xs:text-[3vw] border-[#5c6ead] hover:bg-[#244c89]"
           href="/play"
-        >Play</a>        
-        {/* <div className="flex gap-[3vw]">
-          <input type="text" placeholder="Enter Join Code" className="peer bg-[#1b4381] p-[2vh] xs:rounded-[30px] xxs:rounded-[20px] border-[.5vh] border-[#5c6ead] xs:text-[3vw] xxs:text-[4vw] text-[#ffdebd]" onChange={(e) => {handleInputChange(e.target.value)}}/>
-        </div> */}
+        >Play</a>
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 import React from 'react';
 import NavBar from '../components/NavBar';
 import GameOff from '../components/game_comps/GameOff';
-// import GameServer from '../components/GameServer';
 
 const page = () => {
   return (
