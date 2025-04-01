@@ -14,6 +14,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.14.0
         version: 11.14.0(@emotion/react@11.14.0(@types/react@18.3.18)(react@18.3.1))(@types/react@18.3.18)(react@18.3.1)
+      '@ion-phaser/react':
+        specifier: ^1.3.0
+        version: 1.3.0(phaser@3.88.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mui/material':
         specifier: ^6.4.7
         version: 6.4.7(@emotion/react@11.14.0(@types/react@18.3.18)(react@18.3.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@18.3.18)(react@18.3.1))(@types/react@18.3.18)(react@18.3.1))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -164,6 +167,18 @@ packages:
 
   '@emotion/weak-memoize@0.4.0':
     resolution: {integrity: sha512-snKqtPW01tN0ui7yu9rGv69aJXr/a/Ywvl11sUjNtEcRc+ng/mQriFL0wLXMef74iHa/EkftbDzU9F8iFbH+zg==}
+
+  '@ion-phaser/core@1.3.0':
+    resolution: {integrity: sha512-wJJq2bireC0FaUDR8kBMhmNlmyrGi/fX3g8AhuWi7LIIvZuA4dk33ui/TWt3xM5Ax2Uqhr2Z4NtBsQUFpHheiA==}
+    peerDependencies:
+      phaser: ^3.19.0
+
+  '@ion-phaser/react@1.3.0':
+    resolution: {integrity: sha512-AchfH2CpEd9P0LkoWfCaunMTIA7dOtWv/+LgnItswr/rJV34FwI3MC7jarF5j1jvXZBArs0qWkKRWUtxuT9EPA==}
+    peerDependencies:
+      phaser: ^3.19.0
+      react: ^16.7.0
+      react-dom: ^16.7.0
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -345,6 +360,11 @@ packages:
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
+
+  '@stencil/core@2.22.3':
+    resolution: {integrity: sha512-kmVA0M/HojwsfkeHsifvHVIYe4l5tin7J5+DLgtl8h6WWfiMClND5K3ifCXXI2ETDNKiEk21p6jql3Fx9o2rng==}
+    engines: {node: '>=12.10.0', npm: '>=6.0.0'}
+    hasBin: true
 
   '@swc/counter@0.1.3':
     resolution: {integrity: sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ==}
@@ -1310,6 +1330,18 @@ snapshots:
 
   '@emotion/weak-memoize@0.4.0': {}
 
+  '@ion-phaser/core@1.3.0(phaser@3.88.2)':
+    dependencies:
+      '@stencil/core': 2.22.3
+      phaser: 3.88.2
+
+  '@ion-phaser/react@1.3.0(phaser@3.88.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@ion-phaser/core': 1.3.0(phaser@3.88.2)
+      phaser: 3.88.2
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
   '@isaacs/cliui@8.0.2':
     dependencies:
       string-width: 5.1.2
@@ -1460,6 +1492,8 @@ snapshots:
   '@popperjs/core@2.11.8': {}
 
   '@socket.io/component-emitter@3.1.2': {}
+
+  '@stencil/core@2.22.3': {}
 
   '@swc/counter@0.1.3': {}
 

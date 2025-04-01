@@ -1,10 +1,9 @@
 "use client"
-import * as Phaser from "phaser";
 import React, { useEffect, useRef } from "react";
 import GameScene from "./GameScene";
+import * as Phaser from "phaser";
 
 const GameOff : React.FC = () =>{
-
     const gameRef = useRef<Phaser.Game | null>(null);
     
     useEffect(() =>{
@@ -22,7 +21,6 @@ const GameOff : React.FC = () =>{
             parent: 'phaser-game-container',
             scene: [GameScene]
         };
-
 
         gameRef.current = new Phaser.Game(config);
 

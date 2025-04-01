@@ -9,7 +9,7 @@ export default function Home() {
     <div className="w-[100%] min-h-[100vh] flex flex-col sm:justify-between pb-10 items-center gap-5 relative bg-[#1d4325] font-impact font-black">
       <NavBar />
       
-      <div className='relative w-[70vw] max-w-[500px] bg-cover text-center pt-[14vh] text-[#ffdebd] text-[4.75vw] md:text-[36.48px]'>
+      <div className='relative w-[27vw] max-w-[500px] bg-cover text-center pt-[14vh] text-[#ffdebd] text-[4.75vw] md:text-[36.48px]'>
         <Image 
           src={HaggleChip}
           width={900}
