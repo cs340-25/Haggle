@@ -30,8 +30,6 @@ class InActCard{
 
     //Compares Card to Other Given Card, returns true if this card is larger, otherwise returns false
     compare(othCard:InActCard){
-        
-        
 
         let selfVal:integer = this.val;
         let othVal:integer = othCard.val;
@@ -55,10 +53,28 @@ class InActCard{
             }
         }
 
+        return false;
+    }
 
+    //Card Comparison function that treats ace as 0
+    hagCompare(othCard:InActCard){
+
+        let selfVal = this.val;
+        let othVal = othCard.val;
+
+        if(selfVal > othVal){
+            return true;
+        }else if(selfVal == othVal){
+            if(this.suit > othCard.suit){
+                return true;
+            }else{
+                return false;
+            }
+        }
 
         return false;
     }
+
 }
 
 //Active Card (Cards seen and Around)
@@ -218,6 +234,37 @@ class PlayHand{
         this.handEmpty = true;
     }
 
+    //shuffles everything except the smallest card into the deck & draws 4
+    Haggle(deck:Deck, scene:Phaser.Scene){
+
+        if(this.Cards.length == 1 || deck.Cards.length < 4) return;
+
+        //Moving Smallest card to end of list
+        let tempCard:ActCard = this.Cards[0];
+        for(let i = 1; i < this.Cards.length; i++){
+
+            if(this.Cards[i-1].hagCompare(this.Cards[i]) == false){
+                
+                tempCard = this.Cards[i-1];
+
+                this.Cards[i-1] = this.Cards[i];
+                this.Cards[i] = tempCard;
+
+            }
+        }
+
+        //Returning cards to deck
+        for(let i = 0; i < 4; i++){
+            deck.Cards.push(this.Cards[0]);
+            this.PlayCard(0);
+        }
+
+        //Adding new cards to hand
+        for(let i = 0; i < 4; i++){
+            this.Cards.push(new ActCard(deck.Draw(), 0, 0,scene,0));
+        }
+
+    }
 
     Update(mouse:Phaser.Input.Pointer, cardPlace:CardZoneP){
 
@@ -366,6 +413,7 @@ class Deck{
 //User Input
 let mouse:Phaser.Input.Pointer;
 let space:Phaser.Input.Keyboard.Key | undefined;
+let aKey:Phaser.Input.Keyboard.Key | undefined;
 let spJustPressed = false;
 
 //Card Zones
@@ -384,22 +432,6 @@ export default class GameScene extends Phaser.Scene{
         super({key:'GameScene'});
     };
 
-//Haggles A Card
-    /*Haggle(retCard:ActCard){
-        let newCard:ActCard;
-
-        let drawnCard:InActCard = this.Draw();
-
-        newCard = new ActCard(drawnCard,retCard.sprite.x,retCard.sprite.y,this);
-
-        if(newCard.suit == -1){
-            console.log("something went wrong");
-            return newCard;
-        }
-        deck.push(retCard.toInAct());
-
-        return newCard;
-    }*/
 
     preload(){
         this.load.image('sky','./assets/sky.png');
@@ -408,6 +440,7 @@ export default class GameScene extends Phaser.Scene{
 
         mouse = this.input.activePointer;
         space = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        aKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     }
 
     create(){
@@ -422,6 +455,8 @@ export default class GameScene extends Phaser.Scene{
     update(){
 
         if(space?.isDown == false) spJustPressed = false;
+
+        if(aKey?.isDown == true) playerHand.Haggle(deck,this);
 
         //updates position of clicked card
         playerHand.Update(mouse,playZone);
@@ -438,7 +473,6 @@ export default class GameScene extends Phaser.Scene{
 
         if(playZone.cardPlaced == true && aiZone.cardPlaced == true){
             if(space?.isDown && spJustPressed == false){
-                //console.log("Bullshit"); 
 
                 if(playZone.compare(aiZone)){
                     console.log('Player Won');
