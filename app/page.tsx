@@ -11,7 +11,7 @@ export default function Home() {
     <div className="w-[100%] min-h-[100vh] flex flex-col sm:justify-between pb-10 items-center gap-5 relative bg-[#1d4325] font-impact font-black">
       <NavBar />
       
-      <div className='relative w-[50vw] max-w-[80vh] bg-cover text-center pt-[7vw] text-[#ffdebd]  md:text-[2.5vw]'>
+      <div className='relative w-[50vw] max-w-[80vh] bg-cover text-center pt-[7vw] text-[#ffdebd] text-[2vw] md:text-[2.5vw]'>
         <Image 
           src={HaggleChip}
           width={900}
