@@ -11,7 +11,7 @@ const page = () => {
         {/* <div className='mt-[10vh] h-[60vh] w-[60vh] bg-[url("/chip.svg")] bg-cover text-center pt-[32.5vh] text-[#1b4381] text-[8vh]'>
           Rules
         </div> */}
-        <div className='relative w-[60vw] max-w-[400px] bg-cover text-center pt-[14vh] text-[#ffdebd] text-[4.75vw] md:text-[36.48px]'>
+        <div className='relative w-[50vw] max-w-[80vh] bg-cover text-center pt-[14vh] text-[#ffdebd] text-[2vw] md:text-[2.5vw]'>
           <Image 
             src={HaggleChip}
             width={900}
