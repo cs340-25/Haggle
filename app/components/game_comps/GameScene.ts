@@ -51,9 +51,7 @@ class InActCard {
                 return false;
             }
         }
-
-
-
+        
         return false;
     }
 }
