@@ -172,21 +172,20 @@ class CardZoneP extends InActCard {
         return false;
     }
     
-    ActiveCheck(playHand: PlayHand) {
-
+    ActiveCheck(playHand: PlayHand): boolean {
         for(let i = 0; i < playHand.Cards.length; i++) {
-
             if(this.CardPlaceCheck(playHand.Cards[i])) {
                 this.sprite.setTexture('cardF', playHand.Cards[i].frame);
                 this.suit = playHand.Cards[i].suit;
                 this.val = playHand.Cards[i].val;
                 playHand.PlayCard(i);
                 this.cardPlaced = true;
-                break;
+
+                roundStarted = true;
+                return true;
             }
-
         }
-
+        return false;
     }
 
     Reset() {
@@ -459,6 +458,48 @@ class Deck {
     }
 }
 
+
+class HaggleButton {
+    constructor(scene: Phaser.Scene) {
+        scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0xff0000, roundStarted ? .5 : 1);
+    }
+
+    reloadButton(scene: Phaser.Scene) {
+        scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0x204424, 1);
+        scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0xff0000, roundStarted ? .5 : 1);
+    }
+
+    //returns true if the given card overlaps with the haggle section & has been not clicked otherwise returns false
+    CardPlaceCheck(curCard: ActCard) {
+        const topLeft = [runningWidth * .1 - cardWid / 2, runningHeight / 2 - cardHigh / 2];
+        const botRight = [runningWidth * .1 + cardWid / 2, runningHeight / 2 + cardHigh / 2];
+
+        //Hover Over cardPad check
+        if(curCard.clicked == true) return false;
+
+        //This is the collision check
+        if(topLeft[0] <= curCard.sprite.x && botRight[0] >= curCard.sprite.x) {
+
+            if(topLeft[1] <= curCard.sprite.y && botRight[1] >= curCard.sprite.y) {
+                console.log("Condition met");
+                return true;
+            } 
+        }
+
+        return false;
+    }
+
+    checkActive(playHand: PlayHand) {
+        for(let i = 0; i < playHand.Cards.length; i++) {
+            if(this.CardPlaceCheck(playHand.Cards[i])) {
+                console.log("haggle activated!");
+                break;
+            }
+        }
+    }
+}
+
+
 //User Input
 let mouse: Phaser.Input.Pointer;
 let space: Phaser.Input.Keyboard.Key | undefined;
@@ -467,6 +508,8 @@ let spJustPressed = false;
 //Card Zones
 let playZone: CardZoneP;
 let aiZone: CardZoneA;
+let haggleBtn: HaggleButton;
+let roundStarted = false;
 
 //Important Objects
 let playerHand: PlayHand = new PlayHand();
@@ -476,7 +519,6 @@ let deck: Deck = new Deck();
 // Responsivity
 let runningWidth = 0;
 let runningHeight = 0;
-let background: Phaser.GameObjects.Rectangle;
 
 
 export default class GameScene extends Phaser.Scene {
@@ -514,11 +556,14 @@ export default class GameScene extends Phaser.Scene {
     create() {
         runningWidth = this.sys.game.scale.gameSize.width;
         runningHeight = this.sys.game.scale.gameSize.height;
-        this.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth + 2, runningHeight + 2, 0x204424, 1);
 
+        // add background
+        this.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth + 2, runningHeight + 2, 0x204424, 1);
         // const background = this.add.image(runningWidth * .5, runningHeight * .93 * .5, 'sky');
         // background.setScale(runningWidth / 800, runningHeight / 400);
 
+
+        haggleBtn = new HaggleButton(this);
         playZone = new CardZoneP(this);
         aiZone = new CardZoneA(this);
         
@@ -539,6 +584,7 @@ export default class GameScene extends Phaser.Scene {
             aiHand.ResetPos();
             aiZone.ResetPos();
             playZone.ResetPos();
+            haggleBtn.reloadButton(this);
         }
         
         // background
@@ -550,7 +596,10 @@ export default class GameScene extends Phaser.Scene {
         
         //Sets Card if card is over played zone (doesnt work if current round has ended)
         if(aiZone.cardPlaced == false) {
-            playZone.ActiveCheck(playerHand);
+            let res = playZone.ActiveCheck(playerHand);
+            if (res) {
+                haggleBtn.reloadButton(this);
+            }
         }
         
         //if Player Played a card and Ai Has not
@@ -560,7 +609,8 @@ export default class GameScene extends Phaser.Scene {
         
         if(playZone.cardPlaced == true && aiZone.cardPlaced == true) {
             if(space?.isDown && spJustPressed == false) {
-                //console.log("Bullshit");
+                //console.log("Bullshit"); // what is this print statement? i'll add my own twist
+                //console.log("Ratshit");
                 
                 if(playZone.compare(aiZone)) {
                     console.log('Player Won');
@@ -579,6 +629,8 @@ export default class GameScene extends Phaser.Scene {
             console.log("EVERYTHING IS EMPTY");
             aiHand.DealHand(deck, this);
             playerHand.DealHand(deck, this);
+            roundStarted = false;
+            haggleBtn.reloadButton(this);
         }
         
         //move cards back to center if not being dragged
