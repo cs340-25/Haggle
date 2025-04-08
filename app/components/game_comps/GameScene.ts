@@ -28,6 +28,25 @@ class InActCard {
         this.frame = (Suit * 13) + Val;
     }
 
+    //Card Comparison function that treats ace as 0
+    hagCompare(othCard:InActCard){
+
+        let selfVal = this.val;
+        let othVal = othCard.val;
+
+        if(selfVal > othVal){
+            return true;
+        }else if(selfVal == othVal){
+            if(this.suit > othCard.suit){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        return false;
+    }
+
     //Compares Card to Other Given Card, returns true if this card is larger, otherwise returns false
     compare(othCard: InActCard) {
         let selfVal: integer = this.val;
@@ -251,7 +270,7 @@ class PlayHand {
     ResetPos() {
         const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
         const hndStrt = runningWidth / 2 - 2 * hndSpc;    //Hand Starting Position
-        const handY = runningHeight * .75;
+        const handY = runningHeight * .83;
 
         for(let i = 0; i < this.Cards.length; i++) {
 
@@ -266,6 +285,38 @@ class PlayHand {
         }
 
     }
+
+    //shuffles everything except the smallest card into the deck & draws 4
+    Haggle(deck:Deck, scene:Phaser.Scene){
+
+        if(this.Cards.length == 1 || deck.Cards.length < 4) return;
+
+        //Moving Smallest card to end of list
+        let tempCard:ActCard = this.Cards[0];
+        for(let i = 1; i < this.Cards.length; i++){
+
+            if(this.Cards[i-1].hagCompare(this.Cards[i]) == false){
+                
+                tempCard = this.Cards[i-1];
+
+                this.Cards[i-1] = this.Cards[i];
+                this.Cards[i] = tempCard;
+
+            }
+        }
+
+        //Returning cards to deck
+        for(let i = 0; i < 4; i++){
+            deck.Cards.push(this.Cards[0]);
+            this.PlayCard(0);
+        }
+
+        //Adding new cards to hand
+        for(let i = 0; i < 4; i++){
+            this.Cards.push(new ActCard(deck.Draw(), 0, 0,scene,0));
+        }
+    }
+
 
     PlayCard(indx: integer) {
         this.Cards[indx].sprite.destroy();
@@ -285,7 +336,7 @@ class PlayHand {
     DealHand(deck: Deck, scene: Phaser.Scene) {
         const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
         const hndStrt = runningWidth / 2 - 2 * hndSpc;    //Hand Starting Position
-        const handY = runningHeight * .75;
+        const handY = runningHeight * .83;
 
         for(let i = 0; i < 5; i++) {
             let tempInact = deck.Draw();
@@ -310,7 +361,7 @@ class AiHand {
     ResetPos() {
         const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
         const hndStrt = runningWidth / 2 + 2 * hndSpc;    //Hand Starting Position
-        const handY = runningHeight * .25;
+        const handY = runningHeight * .17;
 
         for(let i = 0; i < this.Cards.length; i++) {
 
@@ -329,7 +380,7 @@ class AiHand {
     DealHand(deck: Deck, scene: Phaser.Scene) {
         const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
         const hndStrt = runningWidth / 2 + 2 * hndSpc;    //Hand Starting Position
-        const handY = runningHeight * .25;
+        const handY = runningHeight * .17;
 
         for(let i = 0; i < 5; i++) {
             let tempInact = deck.Draw();
@@ -425,6 +476,7 @@ let deck: Deck = new Deck();
 // Responsivity
 let runningWidth = 0;
 let runningHeight = 0;
+let background: Phaser.GameObjects.Rectangle;
 
 
 export default class GameScene extends Phaser.Scene {
@@ -451,20 +503,21 @@ export default class GameScene extends Phaser.Scene {
     }*/
 
     preload() {
-        this.load.image('sky', './assets/sky.png');
+        // this.load.image('sky', './assets/sky.png');
         this.load.spritesheet('cardF', './assets/CardF_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
         this.load.spritesheet('cardB', './assets/CardB_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
 
         mouse = this.input.activePointer;
         space = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
-
+    
     create() {
         runningWidth = this.sys.game.scale.gameSize.width;
         runningHeight = this.sys.game.scale.gameSize.height;
+        this.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth + 2, runningHeight + 2, 0x204424, 1);
 
-        const background = this.add.image(runningWidth * .5, runningHeight * .93 * .5, 'sky');
-        background.setScale(runningWidth / 800, runningHeight / 400);
+        // const background = this.add.image(runningWidth * .5, runningHeight * .93 * .5, 'sky');
+        // background.setScale(runningWidth / 800, runningHeight / 400);
 
         playZone = new CardZoneP(this);
         aiZone = new CardZoneA(this);
@@ -475,57 +528,61 @@ export default class GameScene extends Phaser.Scene {
 
     update() {
         let { width, height } = this.sys.game.scale.gameSize;
-
+        
         if (width != runningWidth || height != runningHeight) {
-            const background = this.add.image(width * .5, height * .93 * .5, 'sky');
-            background.setScale(width / 800, height / 400);
+            // const background = this.add.image(width * .5, height * .93 * .5, 'sky');
+            // background.setScale(width / 800, height / 400);
             runningWidth = width;
             runningHeight = height;
+            
+            this.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth + 2, runningHeight + 2, 0x204424, 1);
+            aiHand.ResetPos();
+            aiZone.ResetPos();
+            playZone.ResetPos();
         }
-
+        
+        // background
+        
         if(space?.isDown == false) spJustPressed = false;
-
+        
         //updates position of clicked card
         playerHand.Update(mouse, playZone);
-
+        
         //Sets Card if card is over played zone (doesnt work if current round has ended)
         if(aiZone.cardPlaced == false) {
             playZone.ActiveCheck(playerHand);
         }
-
+        
         //if Player Played a card and Ai Has not
         if(playZone.cardPlaced == true && aiZone.cardPlaced == false) {
             aiZone.PlayCard(aiHand.PlayRand());
         }
-
+        
         if(playZone.cardPlaced == true && aiZone.cardPlaced == true) {
             if(space?.isDown && spJustPressed == false) {
                 //console.log("Bullshit");
-
+                
                 if(playZone.compare(aiZone)) {
                     console.log('Player Won');
                 } else{
                     console.log('AI Won');
                 }
-
+                
                 playZone.Reset();
                 aiZone.Reset();
-
+                
                 spJustPressed = true;
             }
         }
-
+        
         if((playerHand.handEmpty == true && aiHand.handEmpty == true) && (playZone.cardPlaced == false && aiZone.cardPlaced == false)) {
             console.log("EVERYTHING IS EMPTY");
             aiHand.DealHand(deck, this);
             playerHand.DealHand(deck, this);
         }
-
-        //redraw cards for responsivity
+        
+        //move cards back to center if not being dragged
         playerHand.ResetPos();
-        aiHand.ResetPos();
-        aiZone.ResetPos();
-        playZone.ResetPos();
     }
-
+    
 }

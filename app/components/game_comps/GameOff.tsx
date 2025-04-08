@@ -9,6 +9,7 @@ const GameOff : React.FC = () =>{
     useEffect(() =>{
         const config:Phaser.Types.Core.GameConfig = {
             type: Phaser.AUTO,
+            backgroundColor: '#ffffff',
             physics:{
                 default: 'arcade',
                 arcade:{
