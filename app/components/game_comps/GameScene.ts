@@ -119,11 +119,11 @@ class CardZoneP extends InActCard {
     backText: [string, number];    //TextureName, Frame
     cardPlaced: boolean;
 
-    constructor(width: number, height: number, scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene) {
         super(0, 0);
 
-        const xPos = width / 2 + cardWid / 2
-        const yPos = height / 2 + 45
+        const xPos = runningWidth / 2 + cardWid / 2;
+        const yPos = runningHeight / 2 + 45;
 
         this.sprite = scene.add.sprite(xPos, yPos, 'cardB', 0);
         this.sprite.depth = 2;
@@ -132,9 +132,9 @@ class CardZoneP extends InActCard {
     }
 
     //returns true if the given card overlaps with the CardPad & has been not clicked otherwise returns false
-    CardPlaceCheck(curCard: ActCard, width: number, height: number) {
-        const xPos = width / 2 + cardWid / 2
-        const yPos = height / 2 + 45
+    CardPlaceCheck(curCard: ActCard) {
+        const xPos = runningWidth / 2 + cardWid / 2
+        const yPos = runningHeight / 2 + 45
         const topLeft = [xPos-cardWid/2, yPos-cardHigh/2];
         const botRight = [xPos+cardWid/2, yPos+cardHigh/2];
 
@@ -153,11 +153,11 @@ class CardZoneP extends InActCard {
         return false;
     }
     
-    ActiveCheck(playHand: PlayHand, width: number, height: number) {
+    ActiveCheck(playHand: PlayHand) {
 
         for(let i = 0; i < playHand.Cards.length; i++) {
 
-            if(this.CardPlaceCheck(playHand.Cards[i], width, height)) {
+            if(this.CardPlaceCheck(playHand.Cards[i])) {
                 this.sprite.setTexture('cardF', playHand.Cards[i].frame);
                 this.suit = playHand.Cards[i].suit;
                 this.val = playHand.Cards[i].val;
@@ -175,9 +175,9 @@ class CardZoneP extends InActCard {
         this.cardPlaced = false;
     }
 
-    ResetPos(width: number, height: number) {
-        let xPos = width / 2 + cardWid / 2;
-        let yPos = height / 2 + 45;
+    ResetPos() {
+        let xPos = runningWidth / 2 + cardWid / 2;
+        let yPos = runningHeight / 2 + 45;
         this.sprite.x = xPos;
         this.sprite.y = yPos;
     }
@@ -190,11 +190,11 @@ class CardZoneA extends InActCard {
     backText: [string, number];    //TextureName, Frame
     cardPlaced: boolean;
 
-    constructor(width: number, height: number, scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene) {
         super(0, 0);
 
-        let xPos = width / 2 - cardWid / 2;
-        let yPos = height / 2 - 45;
+        let xPos = runningWidth / 2 - cardWid / 2;
+        let yPos = runningHeight / 2 - 45;
 
         this.backText = ['cardB', 1];
         this.sprite = scene.add.sprite(xPos, yPos, 'cardB', 1);
@@ -202,9 +202,9 @@ class CardZoneA extends InActCard {
         this.cardPlaced = false;
     }
 
-    ResetPos(width: number, height: number) {
-        let xPos = width / 2 - cardWid / 2;
-        let yPos = height / 2 - 45;
+    ResetPos() {
+        let xPos = runningWidth / 2 - cardWid / 2;
+        let yPos = runningHeight / 2 - 45;
         this.sprite.x = xPos;
         this.sprite.y = yPos;
     }
@@ -248,10 +248,10 @@ class PlayHand {
     }
 
     //resets non-clicked cards positions
-    ResetPos(width: number, height: number) {
-        const hndSpc = width / 4 - (width * .1);    //Space Between Cards' centers in hand (X)
-        const hndStrt = width / 2 - 2 * hndSpc;    //Hand Starting Position
-        const handY = height * .75;
+    ResetPos() {
+        const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
+        const hndStrt = runningWidth / 2 - 2 * hndSpc;    //Hand Starting Position
+        const handY = runningHeight * .75;
 
         for(let i = 0; i < this.Cards.length; i++) {
 
@@ -282,10 +282,10 @@ class PlayHand {
         }
     }
 
-    DealHand(deck: Deck, scene: Phaser.Scene, width: number, height: number) {
-        const hndSpc = width / 4 - (width * .1);    //Space Between Cards' centers in hand (X)
-        const hndStrt = width / 2 - 2 * hndSpc;    //Hand Starting Position
-        const handY = height * .75;
+    DealHand(deck: Deck, scene: Phaser.Scene) {
+        const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
+        const hndStrt = runningWidth / 2 - 2 * hndSpc;    //Hand Starting Position
+        const handY = runningHeight * .75;
 
         for(let i = 0; i < 5; i++) {
             let tempInact = deck.Draw();
@@ -307,10 +307,10 @@ class AiHand {
     }
 
     //resets non-clicked cards positions
-    ResetPos(width: number, height: number) {
-        const hndSpc = width / 4 - (width * .1);    //Space Between Cards' centers in hand (X)
-        const hndStrt = width / 2 + 2 * hndSpc;    //Hand Starting Position
-        const handY = height * .25;
+    ResetPos() {
+        const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
+        const hndStrt = runningWidth / 2 + 2 * hndSpc;    //Hand Starting Position
+        const handY = runningHeight * .25;
 
         for(let i = 0; i < this.Cards.length; i++) {
 
@@ -326,10 +326,10 @@ class AiHand {
 
     }
 
-    DealHand(deck: Deck, scene: Phaser.Scene, width: number, height: number) {
-        const hndSpc = width / 4 - (width * .1);    //Space Between Cards' centers in hand (X)
-        const hndStrt = width / 2 + 2 * hndSpc;    //Hand Starting Position
-        const handY = height * .25;
+    DealHand(deck: Deck, scene: Phaser.Scene) {
+        const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
+        const hndStrt = runningWidth / 2 + 2 * hndSpc;    //Hand Starting Position
+        const handY = runningHeight * .25;
 
         for(let i = 0; i < 5; i++) {
             let tempInact = deck.Draw();
@@ -466,11 +466,11 @@ export default class GameScene extends Phaser.Scene {
         const background = this.add.image(runningWidth * .5, runningHeight * .93 * .5, 'sky');
         background.setScale(runningWidth / 800, runningHeight / 400);
 
-        playZone = new CardZoneP(runningWidth, runningHeight, this);
-        aiZone = new CardZoneA(runningWidth, runningHeight, this);
+        playZone = new CardZoneP(this);
+        aiZone = new CardZoneA(this);
         
-        aiHand.DealHand(deck, this, runningWidth, runningHeight);
-        playerHand.DealHand(deck, this, runningWidth, runningHeight);
+        aiHand.DealHand(deck, this);
+        playerHand.DealHand(deck, this);
     }
 
     update() {
@@ -490,7 +490,7 @@ export default class GameScene extends Phaser.Scene {
 
         //Sets Card if card is over played zone (doesnt work if current round has ended)
         if(aiZone.cardPlaced == false) {
-            playZone.ActiveCheck(playerHand, width, height);
+            playZone.ActiveCheck(playerHand);
         }
 
         //if Player Played a card and Ai Has not
@@ -517,15 +517,15 @@ export default class GameScene extends Phaser.Scene {
 
         if((playerHand.handEmpty == true && aiHand.handEmpty == true) && (playZone.cardPlaced == false && aiZone.cardPlaced == false)) {
             console.log("EVERYTHING IS EMPTY");
-            aiHand.DealHand(deck, this, width, height);
-            playerHand.DealHand(deck, this, width, height);
+            aiHand.DealHand(deck, this);
+            playerHand.DealHand(deck, this);
         }
 
         //redraw cards for responsivity
-        playerHand.ResetPos(width, height);
-        aiHand.ResetPos(width, height);
-        aiZone.ResetPos(width, height);
-        playZone.ResetPos(width, height);
+        playerHand.ResetPos();
+        aiHand.ResetPos();
+        aiZone.ResetPos();
+        playZone.ResetPos();
     }
 
 }
