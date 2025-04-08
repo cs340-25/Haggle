@@ -9,14 +9,16 @@ const GameOff : React.FC = () =>{
     useEffect(() =>{
         const config:Phaser.Types.Core.GameConfig = {
             type: Phaser.AUTO,
-            width: 800,
-            height: 400,
             physics:{
                 default: 'arcade',
                 arcade:{
                     gravity: {x:0, y:300 },
                     debug: false
                 }
+            },
+            scale:{
+                mode: Phaser.Scale.RESIZE, // or Phaser.Scale.RESIZE or Phaser.Scale.ENVELOP
+                autoCenter: Phaser.Scale.CENTER_BOTH,
             },
             parent: 'phaser-game-container',
             scene: [GameScene]
@@ -29,11 +31,10 @@ const GameOff : React.FC = () =>{
                 gameRef.current.destroy(true);
             }
         };
-
     },[]);
 
 
-    return <div id="phaser-game-container"/>;
+    return <div id="phaser-game-container" className="h-[93vh] w-screen mt-[7vh]"/>;
 };
 
 export default GameOff;
