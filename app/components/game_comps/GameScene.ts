@@ -465,37 +465,21 @@ class HaggleButton {
     }
 
     reloadButton(scene: Phaser.Scene) {
+        // draw background BEFORE drawing translucent button
         scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0x204424, 1);
         scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0xff0000, roundStarted ? .5 : 1);
     }
 
-    //returns true if the given card overlaps with the haggle section & has been not clicked otherwise returns false
-    CardPlaceCheck(curCard: ActCard) {
+    mouseCheck(mouse: Phaser.Input.Pointer): boolean {
         const topLeft = [runningWidth * .1 - cardWid / 2, runningHeight / 2 - cardHigh / 2];
         const botRight = [runningWidth * .1 + cardWid / 2, runningHeight / 2 + cardHigh / 2];
 
-        //Hover Over cardPad check
-        if(curCard.clicked == true) return false;
-
-        //This is the collision check
-        if(topLeft[0] <= curCard.sprite.x && botRight[0] >= curCard.sprite.x) {
-
-            if(topLeft[1] <= curCard.sprite.y && botRight[1] >= curCard.sprite.y) {
-                console.log("Condition met");
+        if(topLeft[0] <= mouse.x && botRight[0] >= mouse.x) {
+            if(topLeft[1] <= mouse.y && botRight[1] >= mouse.y) {
                 return true;
             } 
         }
-
         return false;
-    }
-
-    checkActive(playHand: PlayHand) {
-        for(let i = 0; i < playHand.Cards.length; i++) {
-            if(this.CardPlaceCheck(playHand.Cards[i])) {
-                console.log("haggle activated!");
-                break;
-            }
-        }
     }
 }
 
@@ -598,6 +582,16 @@ export default class GameScene extends Phaser.Scene {
         if(aiZone.cardPlaced == false) {
             let res = playZone.ActiveCheck(playerHand);
             if (res) {
+                haggleBtn.reloadButton(this);
+            }
+
+            if (!roundStarted && mouse.isDown) {
+                let res = haggleBtn.mouseCheck(mouse);
+                if (res) {
+                    console.log("haggle activated!");
+                }
+        
+                roundStarted = true;
                 haggleBtn.reloadButton(this);
             }
         }
