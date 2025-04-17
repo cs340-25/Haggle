@@ -648,7 +648,7 @@ let runningHeight:number = 0;
 //Set Win Variables (keeps track of sets won)
 let playSWin:number = 0;
 let aiSWin:number = 0;
-let setEnded = true;
+let setEnded = false;
 
 //Bid Win Variables (keeps track of bids won in a set)
 let playBWin:number = 0;
