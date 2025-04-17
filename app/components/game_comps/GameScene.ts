@@ -1,5 +1,4 @@
-import { Console } from "console";
-import { Collision, Vector, World } from "matter";
+
 import * as Phaser from "phaser";
 
 //Constants
@@ -293,11 +292,13 @@ class PlayHand {
     Cards: ActCard[];
     cardClicked: boolean;    //if a card in hand has been clicked
     handEmpty: boolean;
+    haggled: boolean;
 
     constructor() {
         this.Cards = [];
         this.cardClicked = false;
         this.handEmpty = true;
+        this.haggled = false;
     }
 
 
@@ -332,12 +333,14 @@ class PlayHand {
     }
 
     //shuffles everything except the smallest card into the deck & draws 4
-    Haggle(deck:Deck, scene:Phaser.Scene){
+    async Haggle(deck: Deck, scene: Phaser.Scene){
 
         if(this.Cards.length == 1 || deck.Cards.length < 4) return;
+        if(this.haggled) return;
+        this.haggled = true;
 
         //Moving Smallest card to end of list
-        let tempCard:ActCard = this.Cards[0];
+        let tempCard: ActCard = this.Cards[0];
         for(let i = 1; i < this.Cards.length; i++){
 
             if(this.Cards[i-1].hagCompare(this.Cards[i]) == false){
@@ -353,12 +356,17 @@ class PlayHand {
         //Returning cards to deck
         for(let i = 0; i < 4; i++){
             deck.Cards.push(this.Cards[0]);
+            console.log("removing: ", i);
             this.PlayCard(0);
+            console.log("new length: ", this.Cards.length);
         }
 
         //Adding new cards to hand
         for(let i = 0; i < 4; i++){
-            this.Cards.push(new ActCard(deck.Draw(), 0, 0,scene,0));
+            console.log("adding: ", i);
+            this.Cards.push(new ActCard(deck.Draw(), 0, 0, scene, 0));
+            gameScene.sound.play("drawCard", {volume: 0.5});
+            await sleep(100);
         }
     }
 
@@ -378,17 +386,22 @@ class PlayHand {
         }
     }
 
-    DealHand(deck: Deck, scene: Phaser.Scene) {
+    async DealHand(deck: Deck, scene: Phaser.Scene) {
+        this.Cards.forEach(x => x.sprite.destroy());
+        this.Cards = [];
         const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
         const hndStrt = runningWidth / 2 - 2 * hndSpc;    //Hand Starting Position
         const handY = runningHeight * .83;
 
+        this.handEmpty = false;
         for(let i = 0; i < 5; i++) {
             let tempInact = deck.Draw();
             let xPos = hndStrt + (hndSpc * (i));
             this.Cards[i] = new ActCard(tempInact, xPos, handY, scene, 0);
+
+            gameScene.sound.play("drawCard", {volume: 0.5});
+            await sleep(100);
         }
-        this.handEmpty = false;
     }
 }
 
@@ -422,17 +435,22 @@ class AiHand {
 
     }
 
-    DealHand(deck: Deck, scene: Phaser.Scene) {
+    async DealHand(deck: Deck, scene: Phaser.Scene) {
+        this.Cards.forEach(x => x.sprite.destroy());
+        this.Cards = [];
         const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
         const hndStrt = runningWidth / 2 + 2 * hndSpc;    //Hand Starting Position
         const handY = runningHeight * .17;
 
+        this.handEmpty = false;
         for(let i = 0; i < 5; i++) {
             let tempInact = deck.Draw();
             let xPos = hndStrt - (hndSpc * (i));
             this.Cards[i] = new ActCard(tempInact, xPos, handY, scene, 2);
+
+            gameScene.sound.play("drawCard", {volume: 0.5});
+            await sleep(100);
         }
-        this.handEmpty = false;
     }
 
     //returns a random card from Ai Hand, removes card from hand
@@ -552,8 +570,11 @@ class EndMenu {
     backdrop;
     message;
     tip;
+    startTip;
+    scene;
 
     constructor(scene: Phaser.Scene) {
+        this.scene = scene;
         this.backdrop = scene.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth, runningHeight, 0x000000);
         // this.displayBox = scene.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth * .5, runningHeight * .5, 0x204424);
         this.message = scene.add.text(runningWidth / 2, runningHeight * 3 / 8, "End Menu Message", {
@@ -565,28 +586,35 @@ class EndMenu {
             fontSize: 28,
             color: '#a0a0a0',
         }).setOrigin(.5, .5);
+        this.startTip = scene.add.text(runningWidth / 2, runningHeight * 3 / 8 + 40, "Click to play!", {
+            fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
+            fontSize: 28,
+            color: '#a0a0a0',
+        }).setOrigin(.5, .5);
         this.backdrop.depth = 100;
-        // this.displayBox.depth = 101;
         this.tip.depth = 102;
+        this.startTip.depth = 102;
         this.message.depth = 102;
         this.backdrop.setAlpha(0);
-        // this.displayBox.setAlpha(0);
         this.tip.setAlpha(0);
         this.message.setAlpha(0);
     }
 
     reloadEndMenu(playerWon: boolean) {
         this.backdrop.setSize(runningWidth, runningHeight);
-        // this.displayBox.setSize(runningWidth / 2, runningHeight / 2);
         this.backdrop.setPosition(runningWidth / 2, runningHeight / 2);
-        // this.displayBox.setPosition(runningWidth / 2, runningHeight / 2);
         this.message.setPosition(runningWidth / 2, runningHeight * 3 / 8);
         this.tip.setPosition(runningWidth / 2, runningHeight * 3 / 8 + 40);
-        this.message.setText(playerWon ? "You win!" : "You lose...");
         this.backdrop.setAlpha(setEnded ? .9 : 0);
-        this.tip.setAlpha(setEnded ? 1 : 0);
-        this.message.setAlpha(setEnded ? 1 : 0);
-        // this.displayBox.setAlpha(setEnded ? 1 : 0);
+        if(!startMenu){
+            this.message.setText(playerWon ? "You win!" : "You lose...");
+            this.tip.setAlpha(setEnded ? 1 : 0);
+            this.startTip.setAlpha(0);
+            this.message.setAlpha(setEnded ? 1 : 0);
+        } else{
+            this.startTip.setAlpha(1);
+            startMenu = false;
+        }
     }
 }
 
@@ -648,11 +676,15 @@ let runningHeight:number = 0;
 //Set Win Variables (keeps track of sets won)
 let playSWin:number = 0;
 let aiSWin:number = 0;
-let setEnded = false;
+let setEnded = true;
+let startMenu = true;
 
 //Bid Win Variables (keeps track of bids won in a set)
 let playBWin:number = 0;
 let aiBWin:number = 0;
+
+let gameScene: Phaser.Scene;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export default class GameScene extends Phaser.Scene {
 
@@ -665,11 +697,16 @@ export default class GameScene extends Phaser.Scene {
         this.load.spritesheet('cardB', './assets/CardB_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
         this.load.image('chip', './assets/chip.png');
 
+        this.load.audio("drawCard", "./assets/SoundEffects/GP_Draw_2.wav");
+        this.load.audio("win", "./assets/SoundEffects/GP_Damage_6.wav");
+        this.load.audio("cardPutDown", "./assets/SoundEffects/GP_PutDown_1.wav");
+
         mouse = this.input.activePointer;
         space = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
     
-    create() {
+    async create() {
+        gameScene = this;
         runningWidth = this.sys.game.scale.gameSize.width;
         runningHeight = this.sys.game.scale.gameSize.height;
 
@@ -683,12 +720,9 @@ export default class GameScene extends Phaser.Scene {
         endMenu = new EndMenu(this);
         playChips = new PointDisplay(this, [.1, .83], true);
         aiChips = new PointDisplay(this, [.9, .17], true);
-        
-        aiHand.DealHand(deck, this);
-        playerHand.DealHand(deck, this);
     }
 
-    update() {
+    async update() {
         let { width, height } = this.sys.game.scale.gameSize;
         
         if (width != runningWidth || height != runningHeight) {
@@ -717,8 +751,11 @@ export default class GameScene extends Phaser.Scene {
             if (mouse.isDown) {
                 setEnded = false;
                 endMenu.reloadEndMenu(false);
-                playChips.reload(playBWin);
                 aiChips.reload(aiBWin);
+                playChips.reload(playBWin);
+                await aiHand.DealHand(deck, this);
+                await playerHand.DealHand(deck, this);
+                playerHand.haggled = false;
             }
         }
         
@@ -741,16 +778,17 @@ export default class GameScene extends Phaser.Scene {
     
                 //if haggle button is clicked at the start of round
                 if (!roundStarted && mouse.isDown) {
-                    let res = haggleBtn.mouseCheck(mouse);
-                    if (res) {
+                    let result = haggleBtn.mouseCheck(mouse);
+                    if (result) {
                         //console.log("haggle activated!");
-                        playerHand.Haggle(deck,this);
+                        await playerHand.Haggle(deck, this);
                     }
                 }
             }
             
             //if Player Played a card and Ai Has not
             if(playZone.cardPlaced == true && aiZone.cardPlaced == false) {
+                this.sound.play("cardPutDown");
                 aiZone.PlayCard(aiHand.PlayRand());
     
                 //Adding played cards to log
@@ -765,10 +803,12 @@ export default class GameScene extends Phaser.Scene {
                         console.log('Player Won');
                         playBWin++;
                         playChips.reload(playBWin);
+                        this.sound.play("win", {detune: 500});
                     } else{
                         console.log('AI Won');
                         aiBWin++;
                         aiChips.reload(aiBWin);
+                        this.sound.play("win", {detune: -200});
                     }
                     
                     playZone.Reset();
@@ -798,8 +838,6 @@ export default class GameScene extends Phaser.Scene {
                 aiBWin = 0;
 
                 deck.ResetDeck();
-                aiHand.DealHand(deck, this);
-                playerHand.DealHand(deck, this);
                 roundStarted = false;
                 haggleBtn.reloadButton(this);
             }

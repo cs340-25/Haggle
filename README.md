@@ -2,6 +2,8 @@
 
 A NextJS, online card game perfect for ruining friendships.
 
+Thank you so much to Olex Mazur over on itch.io for creating the free sound effects that we used.
+
 
 ## 1. How to use
 
