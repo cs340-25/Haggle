@@ -647,6 +647,36 @@ class PointDisplay {
 }
 
 
+class Tip {
+    textObj;
+    position;
+    curText;
+    display;
+
+    constructor(scene: Phaser.Scene, position: number[]) {
+        this.position = position;
+        this.curText = "Tip Display";
+        this.display = false;
+        this.textObj = scene.add.text(runningWidth * position[0], runningHeight * position[1], "Tip Display", {
+            fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
+            fontSize: 28,
+            color: '#a0a0a0',
+            align: 'center',
+        }).setOrigin(.5, .5).setAlpha(0).setDepth(2);
+    }
+
+    reload(text?: string, display?: boolean) {
+        this.curText = text !== undefined ? text : this.curText;
+        this.display = display !== undefined ? display : this.display;
+        this.textObj.setText(this.curText).setAlpha(this.display ? 1 : 0);
+        this.textObj.setPosition(
+            runningWidth * this.position[0],
+            runningHeight * this.position[1],
+        )
+    }
+}
+
+
 //Variables
 
 //User Input
@@ -668,6 +698,7 @@ let cardLog: PlayedLog;
 let endMenu: EndMenu;
 let playChips: PointDisplay;
 let aiChips: PointDisplay;
+let tip: Tip;
 
 // Responsivity
 let runningWidth:number = 0;
@@ -720,6 +751,7 @@ export default class GameScene extends Phaser.Scene {
         endMenu = new EndMenu(this);
         playChips = new PointDisplay(this, [.1, .80], true);
         aiChips = new PointDisplay(this, [.9, .20], true);
+        tip = new Tip(this, [.1, .17]);
     }
 
     async update() {
@@ -740,6 +772,7 @@ export default class GameScene extends Phaser.Scene {
             endMenu.reloadEndMenu(false);
             playChips.reload(playBWin);
             aiChips.reload(aiBWin);
+            tip.reload();
         }
 
         // if set has ended, display the end game screen if necessary
@@ -756,6 +789,7 @@ export default class GameScene extends Phaser.Scene {
                 await aiHand.DealHand(deck, this);
                 await playerHand.DealHand(deck, this);
                 playerHand.haggled = false;
+                tip.reload("Drag a card\nto the center!", true);
             }
         }
         
@@ -797,6 +831,10 @@ export default class GameScene extends Phaser.Scene {
             }
             
             if(playZone.cardPlaced == true && aiZone.cardPlaced == true) {
+                if (tip.curText != "Press space to\ncontinue.") {
+                    tip.reload("Press space to\ncontinue.", true);
+                }
+
                 if(space?.isDown && spJustPressed == false) {
                     
                     if(playZone.compare(aiZone)) {
@@ -804,11 +842,13 @@ export default class GameScene extends Phaser.Scene {
                         playBWin++;
                         playChips.reload(playBWin);
                         this.sound.play("win", {detune: 500});
+                        tip.reload("Drag a card\nto the center!", true);
                     } else{
                         console.log('AI Won');
                         aiBWin++;
                         aiChips.reload(aiBWin);
                         this.sound.play("win", {detune: -200});
+                        tip.reload("Drag a card\nto the center!", true);
                     }
                     
                     playZone.Reset();
@@ -819,8 +859,8 @@ export default class GameScene extends Phaser.Scene {
             }
             
             if(((playerHand.handEmpty == true && aiHand.handEmpty == true) && (playZone.cardPlaced == false && aiZone.cardPlaced == false)) || (playBWin == 3 || aiBWin == 3)) {
-                console.log("EVERYTHING IS EMPTY");
-    
+                tip.reload("Tip Display", false);
+                
                 //updating set score
                 if(playBWin > aiBWin){
                     console.log("Player Won the set!");
