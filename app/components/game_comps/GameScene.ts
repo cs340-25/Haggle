@@ -718,8 +718,8 @@ export default class GameScene extends Phaser.Scene {
         aiZone = new CardZoneA(this);
         cardLog = new PlayedLog(this);
         endMenu = new EndMenu(this);
-        playChips = new PointDisplay(this, [.1, .83], true);
-        aiChips = new PointDisplay(this, [.9, .17], true);
+        playChips = new PointDisplay(this, [.1, .80], true);
+        aiChips = new PointDisplay(this, [.9, .20], true);
     }
 
     async update() {
