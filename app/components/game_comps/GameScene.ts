@@ -73,51 +73,6 @@ class InActCard {
         
         return false;
     }
-
-    //Returns a string describing the card
-    toString(){
-
-    //vars
-        let output:string = "";
-        let suit:string = "";
-        
-        switch(this.suit){
-            case SUITS.CLUB:
-                suit = "clubs";
-                break;
-            case SUITS.DIMA:
-                suit = "dimonds";
-                break;
-            case SUITS.HEART:
-                suit = "hearts";
-                break;
-            case SUITS.SPADE:
-                suit = "spades";
-                break;
-            default:
-                return "Bad Card";
-                break;
-        }
-
-        switch(this.val){ 
-            case 0:
-                output = "Ace of " + suit;
-                break;
-            case 10:
-                output = "Jack of " + suit;
-                break;
-            case 11:
-                output = "Queen of " + suit;
-                break;
-            case 12:
-                output = "King of " + suit;
-                break;
-            default:
-                output = (this.val+1) + " of " + suit;
-                break;
-        }
-        return output;
-    }
 }
 
 //Active Card (Cards seen and Around)
@@ -126,16 +81,17 @@ class ActCard extends InActCard {
     frntText: string; //Front Texture Name
     bckText: string; //Back Texture Name
     sprite: Phaser.GameObjects.Image;
-    clicked: boolean;
+    selected: boolean;
 
     //Active Card Constructor (if show back = 0: show face, if show back = 1 cardB[0], else cardB[1])
     constructor(cardInfo: InActCard, xPos: number, yPos: number, scene: Phaser.Scene, showBack: integer) {
         super(cardInfo.suit, cardInfo.val);
-        this.clicked = false;
+        this.selected = false;
         this.frntText = 'cardF';
         this.bckText = 'cardB';
-        this.clicked = false;
+        this.selected = false;
 
+        //Used to determine Back Sprite for cards
         if(showBack == 0) {
             this.sprite = scene.add.sprite(xPos, yPos, this.frntText, cardInfo.frame);
             this.sprite.depth = 2;
@@ -153,14 +109,13 @@ class ActCard extends InActCard {
         return new InActCard(this.suit, this.val);
     }
 
-    //Allows Cards to be Clicked & Dragged
+    //Allows Cards to be Selected (returns if card is selected or not)
     onClicked(mouse: Phaser.Input.Pointer) {
 
         let clicked: boolean = false;
 
-        //if(this.clicked == false && cardSelect == true) return false;
-
-        if(mouse.isDown) {
+        //Old Code
+        /*if(mouse.isDown) {
             if(mouse.x >= this.sprite.x - (cardWid / 2) && mouse.x <= this.sprite.x + (cardWid / 2)) {
                 
                 if(mouse.y >= this.sprite.y - (cardHigh / 2) && mouse.y <= this.sprite.y + (cardHigh / 2)) {
@@ -171,9 +126,49 @@ class ActCard extends InActCard {
         }
 
         //updates
-        this.clicked = clicked;
+        this.clicked = clicked;*/
 
-        return clicked;
+        //Card Clicked Check
+        if(mouse.isDown) {
+            if(mouse.x >= this.sprite.x - (cardWid / 2) && mouse.x <= this.sprite.x + (cardWid / 2)) {
+                if(mouse.y >= this.sprite.y - (cardHigh / 2) && mouse.y <= this.sprite.y + (cardHigh / 2)) {    
+                    clicked = true;
+                }
+            }
+        }
+
+        //Updating card selected status
+        if(this.selected == false && clicked == true){
+            this.selected = true;
+        }else if(this.selected == true && clicked == true){
+            this.selected = false;
+        }
+
+        return this.selected;
+    }
+
+    posUpdate(mouse: Phaser.Input.Pointer){
+
+        //updating Card Pos
+        if(this.selected == true){
+            this.sprite.setPosition(mouse.x,mouse.y);
+        }
+
+        //Making sure card is in bounds
+        if(this.sprite.x > runningWidth){
+            this.sprite.x = runningWidth;
+        }
+        if(this.sprite.x < 0){
+            this.sprite.x = 0;
+        }   
+
+        if(this.sprite.y > runningHeight){
+            this.sprite.y = runningHeight;
+        }
+        if(this.sprite.y < 0){
+            this.sprite.y = 0
+        }
+
     }
 }
 
@@ -203,7 +198,7 @@ class CardZoneP extends InActCard {
         const botRight = [xPos+cardWid/2, yPos+cardHigh/2];
 
         //Hover Over cardPad check
-        if(curCard.clicked == true) return false;
+        if(curCard.selected == true) return false;
 
         //This is the collision check
         if(topLeft[0] <= curCard.sprite.x && botRight[0] >= curCard.sprite.x) {
@@ -279,7 +274,6 @@ class CardZoneA extends InActCard {
 
         this.sprite.setTexture('cardF', card.frame);
         this.cardPlaced = true;
-
     }
 
     Reset() {
@@ -301,14 +295,18 @@ class PlayHand {
     }
 
 
-    Update(mouse: Phaser.Input.Pointer, cardPlace: CardZoneP) {
-
-        let cardSelected = false;
+    SelectUpdate(mouse: Phaser.Input.Pointer) {
 
         for(let i = 0; i < this.Cards.length; i++) {
             this.Cards[i].onClicked(mouse);
         }
+    }
 
+    PosUpdate(mouse: Phaser.Input.Pointer){
+
+        for(let i = 0; i < this.Cards.length; i++){
+            this.Cards[i].posUpdate(mouse);
+        }
     }
 
     //resets non-clicked cards positions
@@ -319,9 +317,9 @@ class PlayHand {
 
         for(let i = 0; i < this.Cards.length; i++) {
 
-            if(this.Cards[i].clicked == true) continue;
+            if(this.Cards[i].selected == true) continue;
 
-            if(this.Cards[i].clicked == false) {
+            if(this.Cards[i].selected == false) {
                 //this.Cards[i].sprite.x = this.crdStrt + ((1+i)* this.crdSpc);
                 this.Cards[i].sprite.x = hndStrt + ((i)* hndSpc);
                 this.Cards[i].sprite.y = handY;
@@ -410,9 +408,9 @@ class AiHand {
 
         for(let i = 0; i < this.Cards.length; i++) {
 
-            if(this.Cards[i].clicked == true) continue;
+            if(this.Cards[i].selected == true) continue;
 
-            if(this.Cards[i].clicked == false) {
+            if(this.Cards[i].selected == false) {
                 //this.Cards[i].sprite.x = this.crdStrt + ((1+i)* this.crdSpc);
                 this.Cards[i].sprite.x = hndStrt - ((i)* hndSpc);
                 this.Cards[i].sprite.y = handY;
@@ -504,23 +502,6 @@ class Deck {
     }
 }
 
-//Class for cards played
-class PlayedLog {
-
-    Log:InActCard[];
-
-    constructor(scene: Phaser.Scene){
-        this.Log = [];
-    }
-
-    //Adds card to log
-    add(card:InActCard){
-        this.Log.push(card);
-        console.log("Added " + card.toString());
-    }
-
-}
-
 
 class HaggleButton {
     constructor(scene: Phaser.Scene) {
@@ -546,7 +527,6 @@ class HaggleButton {
     }
 }
 
-//Variables
 
 //User Input
 let mouse: Phaser.Input.Pointer;
@@ -563,19 +543,11 @@ let roundStarted = false;
 let playerHand: PlayHand = new PlayHand();
 let aiHand: AiHand = new AiHand();
 let deck: Deck = new Deck();
-let cardLog: PlayedLog;
 
 // Responsivity
-let runningWidth:number = 0;
-let runningHeight:number = 0;
+let runningWidth = 0;
+let runningHeight = 0;
 
-//Set Win Variables (keeps track of sets won)
-let playSWin:number = 0;
-let aiSWin:number = 0;
-
-//Bid Win Variables (keeps track of bids won in a set)
-let playBWin:number = 0;
-let aiBWin:number = 0;
 
 export default class GameScene extends Phaser.Scene {
 
@@ -583,7 +555,25 @@ export default class GameScene extends Phaser.Scene {
         super({key: 'GameScene'});
     };
 
+//Haggles A Card
+    /*Haggle(retCard: ActCard) {
+        let newCard: ActCard;
+
+        let drawnCard: InActCard = this.Draw();
+
+        newCard = new ActCard(drawnCard, retCard.sprite.x, retCard.sprite.y, this);
+
+        if(newCard.suit == -1) {
+            console.log("something went wrong");
+            return newCard;
+        }
+        deck.push(retCard.toInAct());
+
+        return newCard;
+    }*/
+
     preload() {
+        // this.load.image('sky', './assets/sky.png');
         this.load.spritesheet('cardF', './assets/CardF_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
         this.load.spritesheet('cardB', './assets/CardB_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
 
@@ -595,13 +585,15 @@ export default class GameScene extends Phaser.Scene {
         runningWidth = this.sys.game.scale.gameSize.width;
         runningHeight = this.sys.game.scale.gameSize.height;
 
-        //Adding Background Rectangle
+        // add background
         this.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth + 2, runningHeight + 2, 0x204424, 1);
+        // const background = this.add.image(runningWidth * .5, runningHeight * .93 * .5, 'sky');
+        // background.setScale(runningWidth / 800, runningHeight / 400);
+
 
         haggleBtn = new HaggleButton(this);
         playZone = new CardZoneP(this);
         aiZone = new CardZoneA(this);
-        cardLog = new PlayedLog(this);
         
         aiHand.DealHand(deck, this);
         playerHand.DealHand(deck, this);
@@ -611,12 +603,12 @@ export default class GameScene extends Phaser.Scene {
         let { width, height } = this.sys.game.scale.gameSize;
         
         if (width != runningWidth || height != runningHeight) {
+            // const background = this.add.image(width * .5, height * .93 * .5, 'sky');
+            // background.setScale(width / 800, height / 400);
             runningWidth = width;
             runningHeight = height;
             
-            //Background
             this.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth + 2, runningHeight + 2, 0x204424, 1);
-            
             aiHand.ResetPos();
             aiZone.ResetPos();
             playZone.ResetPos();
@@ -628,7 +620,7 @@ export default class GameScene extends Phaser.Scene {
         if(space?.isDown == false) spJustPressed = false;
         
         //updates position of clicked card
-        playerHand.Update(mouse, playZone);
+        playerHand.SelectUpdate(mouse);
         
         //Sets Card if card is over played zone (doesnt work if current round has ended)
         if(aiZone.cardPlaced == false) {
@@ -637,12 +629,10 @@ export default class GameScene extends Phaser.Scene {
                 haggleBtn.reloadButton(this);
             }
 
-            //if haggle button is clicked at the start of round
             if (!roundStarted && mouse.isDown) {
                 let res = haggleBtn.mouseCheck(mouse);
                 if (res) {
-                    //console.log("haggle activated!");
-                    playerHand.Haggle(deck,this);
+                    console.log("haggle activated!");
                 }
         
                 roundStarted = true;
@@ -650,24 +640,22 @@ export default class GameScene extends Phaser.Scene {
             }
         }
         
+        playerHand.PosUpdate(mouse);
+
         //if Player Played a card and Ai Has not
         if(playZone.cardPlaced == true && aiZone.cardPlaced == false) {
             aiZone.PlayCard(aiHand.PlayRand());
-
-            //Adding played cards to log
-            cardLog.add(playZone);
-            cardLog.add(aiZone);
         }
         
         if(playZone.cardPlaced == true && aiZone.cardPlaced == true) {
             if(space?.isDown && spJustPressed == false) {
+                //console.log("Bullshit"); // what is this print statement? i'll add my own twist
+                //console.log("Ratshit");
                 
                 if(playZone.compare(aiZone)) {
                     console.log('Player Won');
-                    playBWin++;
                 } else{
                     console.log('AI Won');
-                    aiBWin++;
                 }
                 
                 playZone.Reset();
@@ -679,33 +667,6 @@ export default class GameScene extends Phaser.Scene {
         
         if((playerHand.handEmpty == true && aiHand.handEmpty == true) && (playZone.cardPlaced == false && aiZone.cardPlaced == false)) {
             console.log("EVERYTHING IS EMPTY");
-
-            //updating set score
-            if(playBWin > aiBWin){
-                console.log("Player Won the set!");
-                playSWin++;
-            }else{
-                console.log("Ai Won the set!");
-                aiSWin++;
-            }
-
-            //resetting bid win score
-            playBWin = 0;
-            playSWin = 0;
-
-            //Won Game check
-            if(playSWin == 3){
-                console.log("Player Won the game!");
-                deck.ResetDeck();
-                playSWin = 0;
-                aiSWin = 0;
-            }else if(aiSWin == 3){
-                console.log("Ai Won the game!");
-                deck.ResetDeck();
-                playSWin = 0;
-                aiSWin = 0;
-            }
-
             aiHand.DealHand(deck, this);
             playerHand.DealHand(deck, this);
             roundStarted = false;
