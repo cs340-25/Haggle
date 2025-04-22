@@ -5,7 +5,7 @@ import HaggleChip from "@/public/chip.svg";
 
 const page = () => {
   return (
-    <div className='w-full h-full flex flex-col items-center justify-center relative gap-5 overflow-scroll bg-[#1d4325] font-impact font-black '>
+    <div className='w-full h-full flex flex-col items-center justify-center relative gap-5 bg-[#1d4325] font-impact font-black '>
         <NavBar />
 
         {/* <div className='mt-[10vh] h-[60vh] w-[60vh] bg-[url("/chip.svg")] bg-cover text-center pt-[32.5vh] text-[#1b4381] text-[8vh]'>

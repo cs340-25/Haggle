@@ -1,5 +1,4 @@
-import { Console } from "console";
-import { Collision, Vector, World } from "matter";
+
 import * as Phaser from "phaser";
 
 //Constants
@@ -14,6 +13,7 @@ enum SUITS {
 const cardWid = 68;
 const cardHigh = 100;
 const chipSize = 64;
+<<<<<<< HEAD
 
 class Mouse{
 
@@ -44,6 +44,8 @@ class Mouse{
 
 
 }
+=======
+>>>>>>> score-display
 
 //Card object | Suits: 0=club, 1=dia, 2=spade, 3=heart
 //Inactive Card (Cards not seen but Around)
@@ -289,11 +291,13 @@ class PlayHand {
     Cards: ActCard[];
     cardClicked: boolean;    //if a card in hand has been clicked
     handEmpty: boolean;
+    haggled: boolean;
 
     constructor() {
         this.Cards = [];
         this.cardClicked = false;
         this.handEmpty = true;
+        this.haggled = false;
     }
 
 
@@ -335,12 +339,14 @@ class PlayHand {
     }
 
     //shuffles everything except the smallest card into the deck & draws 4
-    Haggle(deck:Deck, scene:Phaser.Scene){
+    async Haggle(deck: Deck, scene: Phaser.Scene){
 
         if(this.Cards.length == 1 || deck.Cards.length < 4) return;
+        if(this.haggled) return;
+        this.haggled = true;
 
         //Moving Smallest card to end of list
-        let tempCard:ActCard = this.Cards[0];
+        let tempCard: ActCard = this.Cards[0];
         for(let i = 1; i < this.Cards.length; i++){
 
             if(this.Cards[i-1].hagCompare(this.Cards[i]) == false){
@@ -356,12 +362,17 @@ class PlayHand {
         //Returning cards to deck
         for(let i = 0; i < 4; i++){
             deck.Cards.push(this.Cards[0]);
+            console.log("removing: ", i);
             this.PlayCard(0);
+            console.log("new length: ", this.Cards.length);
         }
 
         //Adding new cards to hand
         for(let i = 0; i < 4; i++){
-            this.Cards.push(new ActCard(deck.Draw(), 0, 0,scene,0));
+            console.log("adding: ", i);
+            this.Cards.push(new ActCard(deck.Draw(), 0, 0, scene, 0));
+            gameScene.sound.play("drawCard", {volume: 0.5});
+            await sleep(100);
         }
     }
 
@@ -381,17 +392,22 @@ class PlayHand {
         }
     }
 
-    DealHand(deck: Deck, scene: Phaser.Scene) {
+    async DealHand(deck: Deck, scene: Phaser.Scene) {
+        this.Cards.forEach(x => x.sprite.destroy());
+        this.Cards = [];
         const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
         const hndStrt = runningWidth / 2 - 2 * hndSpc;    //Hand Starting Position
         const handY = runningHeight * .83;
 
+        this.handEmpty = false;
         for(let i = 0; i < 5; i++) {
             let tempInact = deck.Draw();
             let xPos = hndStrt + (hndSpc * (i));
             this.Cards[i] = new ActCard(tempInact, xPos, handY, scene, 0);
+
+            gameScene.sound.play("drawCard", {volume: 0.5});
+            await sleep(100);
         }
-        this.handEmpty = false;
     }
 }
 
@@ -425,17 +441,22 @@ class AiHand {
 
     }
 
-    DealHand(deck: Deck, scene: Phaser.Scene) {
+    async DealHand(deck: Deck, scene: Phaser.Scene) {
+        this.Cards.forEach(x => x.sprite.destroy());
+        this.Cards = [];
         const hndSpc = runningWidth / 4 - (runningWidth * .1);    //Space Between Cards' centers in hand (X)
         const hndStrt = runningWidth / 2 + 2 * hndSpc;    //Hand Starting Position
         const handY = runningHeight * .17;
 
+        this.handEmpty = false;
         for(let i = 0; i < 5; i++) {
             let tempInact = deck.Draw();
             let xPos = hndStrt - (hndSpc * (i));
             this.Cards[i] = new ActCard(tempInact, xPos, handY, scene, 2);
+
+            gameScene.sound.play("drawCard", {volume: 0.5});
+            await sleep(100);
         }
-        this.handEmpty = false;
     }
 
     //returns a random card from Ai Hand, removes card from hand
@@ -532,6 +553,123 @@ class HaggleButton {
     }
 }
 
+<<<<<<< HEAD
+=======
+
+class EndMenu {
+    // displayBox;
+    backdrop;
+    message;
+    tip;
+    startTip;
+    scene;
+
+    constructor(scene: Phaser.Scene) {
+        this.scene = scene;
+        this.backdrop = scene.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth, runningHeight, 0x000000);
+        // this.displayBox = scene.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth * .5, runningHeight * .5, 0x204424);
+        this.message = scene.add.text(runningWidth / 2, runningHeight * 3 / 8, "End Menu Message", {
+            fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
+            fontSize: 32,
+        }).setOrigin(.5, .5);
+        this.tip = scene.add.text(runningWidth / 2, runningHeight * 3 / 8 + 40, "Click to play again!", {
+            fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
+            fontSize: 28,
+            color: '#a0a0a0',
+        }).setOrigin(.5, .5);
+        this.startTip = scene.add.text(runningWidth / 2, runningHeight * 3 / 8 + 40, "Click to play!", {
+            fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
+            fontSize: 28,
+            color: '#a0a0a0',
+        }).setOrigin(.5, .5);
+        this.backdrop.depth = 100;
+        this.tip.depth = 102;
+        this.startTip.depth = 102;
+        this.message.depth = 102;
+        this.backdrop.setAlpha(0);
+        this.tip.setAlpha(0);
+        this.message.setAlpha(0);
+    }
+
+    reloadEndMenu(playerWon: boolean) {
+        this.backdrop.setSize(runningWidth, runningHeight);
+        this.backdrop.setPosition(runningWidth / 2, runningHeight / 2);
+        this.message.setPosition(runningWidth / 2, runningHeight * 3 / 8);
+        this.tip.setPosition(runningWidth / 2, runningHeight * 3 / 8 + 40);
+        this.backdrop.setAlpha(setEnded ? .9 : 0);
+        if(!startMenu){
+            this.message.setText(playerWon ? "You win!" : "You lose...");
+            this.tip.setAlpha(setEnded ? 1 : 0);
+            this.startTip.setAlpha(0);
+            this.message.setAlpha(setEnded ? 1 : 0);
+        } else{
+            this.startTip.setAlpha(1);
+            startMenu = false;
+        }
+    }
+}
+
+
+class PointDisplay {
+    chips: Phaser.GameObjects.Image[] = []
+    position: number[];
+    isVertical: boolean;
+
+    constructor(scene: Phaser.Scene, position: number[], isVertical: boolean) {
+        this.position = position;
+        this.isVertical = isVertical;
+        this.chips.push(scene.add.image(runningWidth * position[0], runningHeight * position[1], 'chip').setDepth(200));
+        this.chips.push(scene.add.image(runningWidth * position[0], runningHeight * position[1], 'chip').setDepth(200));
+        this.chips.push(scene.add.image(runningWidth * position[0], runningHeight * position[1], 'chip').setDepth(200));
+        this.reload(0);
+    }
+
+    reload(score: number) {
+        // assumes number of chips is odd number
+        let middleIdx = Math.ceil(this.chips.length / 2) - 1;
+        for (let i = 0; i < this.chips.length; ++i) {
+            this.chips[i].setPosition(
+                runningWidth * this.position[0] - (this.isVertical ? 0 : chipSize * 1.2 * (i - middleIdx)),
+                runningHeight * this.position[1] - (!this.isVertical ? 0 : chipSize * 1.2 * (i - middleIdx))
+            )
+            this.chips[i].setAlpha(score > i ? 1 : .3);
+        }
+    }
+}
+
+
+class Tip {
+    textObj;
+    position;
+    curText;
+    display;
+
+    constructor(scene: Phaser.Scene, position: number[]) {
+        this.position = position;
+        this.curText = "Tip Display";
+        this.display = false;
+        this.textObj = scene.add.text(runningWidth * position[0], runningHeight * position[1], "Tip Display", {
+            fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif',
+            fontSize: 28,
+            color: '#a0a0a0',
+            align: 'center',
+        }).setOrigin(.5, .5).setAlpha(0).setDepth(2);
+    }
+
+    reload(text?: string, display?: boolean) {
+        this.curText = text !== undefined ? text : this.curText;
+        this.display = display !== undefined ? display : this.display;
+        this.textObj.setText(this.curText).setAlpha(this.display ? 1 : 0);
+        this.textObj.setPosition(
+            runningWidth * this.position[0],
+            runningHeight * this.position[1],
+        )
+    }
+}
+
+
+//Variables
+>>>>>>> score-display
 
 //User Input
 let mouse: Mouse;
@@ -548,11 +686,34 @@ let roundStarted = false;
 let playerHand: PlayHand = new PlayHand();
 let aiHand: AiHand = new AiHand();
 let deck: Deck = new Deck();
+<<<<<<< HEAD
+=======
+let cardLog: PlayedLog;
+let endMenu: EndMenu;
+let playChips: PointDisplay;
+let aiChips: PointDisplay;
+let tip: Tip;
+>>>>>>> score-display
 
 // Responsivity
 let runningWidth = 0;
 let runningHeight = 0;
 
+<<<<<<< HEAD
+=======
+//Set Win Variables (keeps track of sets won)
+let playSWin:number = 0;
+let aiSWin:number = 0;
+let setEnded = true;
+let startMenu = true;
+
+//Bid Win Variables (keeps track of bids won in a set)
+let playBWin:number = 0;
+let aiBWin:number = 0;
+>>>>>>> score-display
+
+let gameScene: Phaser.Scene;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export default class GameScene extends Phaser.Scene {
 
@@ -581,12 +742,18 @@ export default class GameScene extends Phaser.Scene {
         // this.load.image('sky', './assets/sky.png');
         this.load.spritesheet('cardF', './assets/CardF_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
         this.load.spritesheet('cardB', './assets/CardB_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
+        this.load.image('chip', './assets/chip.png');
+
+        this.load.audio("drawCard", "./assets/SoundEffects/GP_Draw_2.wav");
+        this.load.audio("win", "./assets/SoundEffects/GP_Damage_6.wav");
+        this.load.audio("cardPutDown", "./assets/SoundEffects/GP_PutDown_1.wav");
 
         mouse = new Mouse(this);
         space = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
     
-    create() {
+    async create() {
+        gameScene = this;
         runningWidth = this.sys.game.scale.gameSize.width;
         runningHeight = this.sys.game.scale.gameSize.height;
 
@@ -599,12 +766,20 @@ export default class GameScene extends Phaser.Scene {
         haggleBtn = new HaggleButton(this);
         playZone = new CardZoneP(this);
         aiZone = new CardZoneA(this);
+<<<<<<< HEAD
         
         aiHand.DealHand(deck, this);
         playerHand.DealHand(deck, this);
+=======
+        cardLog = new PlayedLog(this);
+        endMenu = new EndMenu(this);
+        playChips = new PointDisplay(this, [.1, .80], true);
+        aiChips = new PointDisplay(this, [.9, .20], true);
+        tip = new Tip(this, [.1, .17]);
+>>>>>>> score-display
     }
 
-    update() {
+    async update() {
         let { width, height } = this.sys.game.scale.gameSize;
         
         if (width != runningWidth || height != runningHeight) {
@@ -615,6 +790,7 @@ export default class GameScene extends Phaser.Scene {
             
             this.add.rectangle(runningWidth / 2, runningHeight / 2, runningWidth + 2, runningHeight + 2, 0x204424, 1);
             aiHand.ResetPos();
+            playerHand.ResetPos();
             aiZone.ResetPos();
             playZone.ResetPos();
             haggleBtn.reloadButton(this);
@@ -630,7 +806,11 @@ export default class GameScene extends Phaser.Scene {
                 endMenu.reloadEndMenu(false);
             }
 
+<<<<<<< HEAD
             if (mouse.justClicked()) {
+=======
+            if (mouse.isDown) {
+>>>>>>> score-display
                 setEnded = false;
                 endMenu.reloadEndMenu(false);
                 aiChips.reload(aiBWin);
@@ -660,7 +840,11 @@ export default class GameScene extends Phaser.Scene {
                 }
     
                 //if haggle button is clicked at the start of round
+<<<<<<< HEAD
                 if (!roundStarted && mouse.justClicked()) {
+=======
+                if (!roundStarted && mouse.isDown) {
+>>>>>>> score-display
                     let result = haggleBtn.mouseCheck(mouse);
                     if (result) {
                         //console.log("haggle activated!");
