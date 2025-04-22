@@ -14,6 +14,32 @@ const cardWid = 68;
 const cardHigh = 100;
 const chipSize = 64;
 
+
+class Mouse{
+    scene:Phaser.Scene;
+
+    constructor(scene:Phaser.Scene){
+        this.scene = scene;
+    }
+
+    //returns true if mouse just clicked
+    justClicked() {
+        return this.scene.input.activePointer.wasTouch ? 
+               this.scene.input.activePointer.getDuration() === 0 : 
+               this.scene.input.activePointer.isDown;
+    }
+
+    getY(){
+        console.log(""+this.scene.input.activePointer.y);
+        return this.scene.input.activePointer.y;
+    }
+
+    getX(){
+        console.log(""+this.scene.input.activePointer.x);
+        return this.scene.input.activePointer.x;
+    }
+}
+
 //Card object | Suits: 0=club, 1=dia, 2=spade, 3=heart
 //Inactive Card (Cards not seen but Around)
 class InActCard {
@@ -125,15 +151,14 @@ class ActCard extends InActCard {
     frntText: string; //Front Texture Name
     bckText: string; //Back Texture Name
     sprite: Phaser.GameObjects.Image;
-    clicked: boolean;
+    selected: boolean;
 
     //Active Card Constructor (if show back = 0: show face, if show back = 1 cardB[0], else cardB[1])
     constructor(cardInfo: InActCard, xPos: number, yPos: number, scene: Phaser.Scene, showBack: integer) {
         super(cardInfo.suit, cardInfo.val);
-        this.clicked = false;
+        this.selected = false;
         this.frntText = 'cardF';
         this.bckText = 'cardB';
-        this.clicked = false;
 
         if(showBack == 0) {
             this.sprite = scene.add.sprite(xPos, yPos, this.frntText, cardInfo.frame);
@@ -153,26 +178,32 @@ class ActCard extends InActCard {
     }
 
     //Allows Cards to be Clicked & Dragged
-    onClicked(mouse: Phaser.Input.Pointer) {
+    onClicked(mouse: Mouse) {
 
-        let clicked: boolean = false;
-
-        //if(this.clicked == false && cardSelect == true) return false;
-
-        if(mouse.isDown) {
-            if(mouse.x >= this.sprite.x - (cardWid / 2) && mouse.x <= this.sprite.x + (cardWid / 2)) {
+        if(mouse.justClicked()) {
+            if(this.selected == true){
+                this.selected = false;
+                return true;
+            }
+            if(mouse.getX() >= this.sprite.x - (cardWid / 2) && mouse.getX() <= this.sprite.x + (cardWid / 2)) {
                 
-                if(mouse.y >= this.sprite.y - (cardHigh / 2) && mouse.y <= this.sprite.y + (cardHigh / 2)) {
-                    this.sprite.setPosition(mouse.x, mouse.y);
-                    clicked = true;
+                if(mouse.getY() >= this.sprite.y - (cardHigh / 2) && mouse.getY() <= this.sprite.y + (cardHigh / 2)) {
+                    //this.sprite.setPosition(mouse.x, mouse.y);
+                    this.selected = true;
                 }
             }
         }
 
-        //updates
-        this.clicked = clicked;
+        return this.selected;
+    }
 
-        return clicked;
+    update(mouse:Mouse){
+
+        if(this.selected){
+            this.sprite.x = mouse.getX();
+            this.sprite.y = mouse.getY();
+        }
+
     }
 }
 
@@ -202,7 +233,7 @@ class CardZoneP extends InActCard {
         const botRight = [xPos+cardWid/2, yPos+cardHigh/2];
 
         //Hover Over cardPad check
-        if(curCard.clicked == true) return false;
+        if(curCard.selected == true) return false;
 
         //This is the collision check
         if(topLeft[0] <= curCard.sprite.x && botRight[0] >= curCard.sprite.x) {
@@ -302,12 +333,13 @@ class PlayHand {
     }
 
 
-    Update(mouse: Phaser.Input.Pointer, cardPlace: CardZoneP) {
+    Update(mouse: Mouse, cardPlace: CardZoneP) {
 
         let cardSelected = false;
 
         for(let i = 0; i < this.Cards.length; i++) {
             this.Cards[i].onClicked(mouse);
+            this.Cards[i].update(mouse);
         }
 
     }
@@ -320,9 +352,9 @@ class PlayHand {
 
         for(let i = 0; i < this.Cards.length; i++) {
 
-            if(this.Cards[i].clicked == true) continue;
+            if(this.Cards[i].selected == true) continue;
 
-            if(this.Cards[i].clicked == false) {
+            if(this.Cards[i].selected == false) {
                 //this.Cards[i].sprite.x = this.crdStrt + ((1+i)* this.crdSpc);
                 this.Cards[i].sprite.x = hndStrt + ((i)* hndSpc);
                 this.Cards[i].sprite.y = handY;
@@ -423,9 +455,9 @@ class AiHand {
 
         for(let i = 0; i < this.Cards.length; i++) {
 
-            if(this.Cards[i].clicked == true) continue;
+            if(this.Cards[i].selected == true) continue;
 
-            if(this.Cards[i].clicked == false) {
+            if(this.Cards[i].selected == false) {
                 //this.Cards[i].sprite.x = this.crdStrt + ((1+i)* this.crdSpc);
                 this.Cards[i].sprite.x = hndStrt - ((i)* hndSpc);
                 this.Cards[i].sprite.y = handY;
@@ -551,12 +583,12 @@ class HaggleButton {
         scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0xff0000, roundStarted ? .5 : 1);
     }
 
-    mouseCheck(mouse: Phaser.Input.Pointer): boolean {
+    mouseCheck(mouse: Mouse): boolean {
         const topLeft = [runningWidth * .1 - cardWid / 2, runningHeight / 2 - cardHigh / 2];
         const botRight = [runningWidth * .1 + cardWid / 2, runningHeight / 2 + cardHigh / 2];
 
-        if(topLeft[0] <= mouse.x && botRight[0] >= mouse.x) {
-            if(topLeft[1] <= mouse.y && botRight[1] >= mouse.y) {
+        if(topLeft[0] <= mouse.getX() && botRight[0] >= mouse.getX()) {
+            if(topLeft[1] <= mouse.getY() && botRight[1] >= mouse.getY()) {
                 return true;
             } 
         }
@@ -680,7 +712,7 @@ class Tip {
 //Variables
 
 //User Input
-let mouse: Phaser.Input.Pointer;
+let mouse: Mouse;
 let space: Phaser.Input.Keyboard.Key | undefined;
 let spJustPressed = false;
 
@@ -732,7 +764,7 @@ export default class GameScene extends Phaser.Scene {
         this.load.audio("win", "./assets/SoundEffects/GP_Damage_6.wav");
         this.load.audio("cardPutDown", "./assets/SoundEffects/GP_PutDown_1.wav");
 
-        mouse = this.input.activePointer;
+        mouse = new Mouse(this);
         space = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
     
@@ -781,7 +813,7 @@ export default class GameScene extends Phaser.Scene {
                 endMenu.reloadEndMenu(false);
             }
 
-            if (mouse.isDown) {
+            if (mouse.justClicked()) {
                 setEnded = false;
                 endMenu.reloadEndMenu(false);
                 aiChips.reload(aiBWin);
@@ -811,7 +843,7 @@ export default class GameScene extends Phaser.Scene {
                 }
     
                 //if haggle button is clicked at the start of round
-                if (!roundStarted && mouse.isDown) {
+                if (!roundStarted && mouse.justClicked()) {
                     let result = haggleBtn.mouseCheck(mouse);
                     if (result) {
                         //console.log("haggle activated!");
