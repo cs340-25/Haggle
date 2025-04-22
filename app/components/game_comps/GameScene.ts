@@ -13,7 +13,37 @@ enum SUITS {
 //Card Dimensions
 const cardWid = 68;
 const cardHigh = 100;
+const chipSize = 64;
 
+class Mouse{
+
+    scene:Phaser.Scene;
+
+    constructor(scene:Phaser.Scene){
+        this.scene = scene;
+    }
+
+    //returns true if mouse just clicked
+    justClicked() {
+        return this.scene.input.activePointer.wasTouch ? 
+               this.scene.input.activePointer.getDuration() === 0 : 
+               this.scene.input.activePointer.isDown;
+    }
+
+
+    getY(){
+        console.log(""+this.scene.input.activePointer.y);
+        return this.scene.input.activePointer.y;
+    }
+
+    getX(){
+        console.log(""+this.scene.input.activePointer.x);
+        return this.scene.input.activePointer.x;
+    }
+
+
+
+}
 
 //Card object | Suits: 0=club, 1=dia, 2=spade, 3=heart
 //Inactive Card (Cards not seen but Around)
@@ -109,64 +139,36 @@ class ActCard extends InActCard {
         return new InActCard(this.suit, this.val);
     }
 
-    //Allows Cards to be Selected (returns if card is selected or not)
-    onClicked(mouse: Phaser.Input.Pointer) {
+    //Allows Cards to be Clicked & Dragged
+    onClicked(mouse: Mouse) {
 
-        let clicked: boolean = false;
+        //let clicked: boolean = false;
 
-        //Old Code
-        /*if(mouse.isDown) {
-            if(mouse.x >= this.sprite.x - (cardWid / 2) && mouse.x <= this.sprite.x + (cardWid / 2)) {
+        if(mouse.justClicked()) {
+
+            if(this.selected == true){
+                this.selected = false;
+                return true;
+            }
+
+            if(mouse.getX() >= this.sprite.x - (cardWid / 2) && mouse.getX() <= this.sprite.x + (cardWid / 2)) {
                 
-                if(mouse.y >= this.sprite.y - (cardHigh / 2) && mouse.y <= this.sprite.y + (cardHigh / 2)) {
-                    this.sprite.setPosition(mouse.x, mouse.y);
-                    clicked = true;
+                if(mouse.getY() >= this.sprite.y - (cardHigh / 2) && mouse.getY() <= this.sprite.y + (cardHigh / 2)) {
+                    //this.sprite.setPosition(mouse.getX(), mouse.getY());
+                    this.selected = true;
                 }
             }
         }
 
-        //updates
-        this.clicked = clicked;*/
-
-        //Card Clicked Check
-        if(mouse.isDown) {
-            if(mouse.x >= this.sprite.x - (cardWid / 2) && mouse.x <= this.sprite.x + (cardWid / 2)) {
-                if(mouse.y >= this.sprite.y - (cardHigh / 2) && mouse.y <= this.sprite.y + (cardHigh / 2)) {    
-                    clicked = true;
-                }
-            }
-        }
-
-        //Updating card selected status
-        if(this.selected == false && clicked == true){
-            this.selected = true;
-        }else if(this.selected == true && clicked == true){
-            this.selected = false;
-        }
 
         return this.selected;
     }
 
-    posUpdate(mouse: Phaser.Input.Pointer){
+    update(mouse:Mouse){
 
-        //updating Card Pos
-        if(this.selected == true){
-            this.sprite.setPosition(mouse.x,mouse.y);
-        }
-
-        //Making sure card is in bounds
-        if(this.sprite.x > runningWidth){
-            this.sprite.x = runningWidth;
-        }
-        if(this.sprite.x < 0){
-            this.sprite.x = 0;
-        }   
-
-        if(this.sprite.y > runningHeight){
-            this.sprite.y = runningHeight;
-        }
-        if(this.sprite.y < 0){
-            this.sprite.y = 0
+        if(this.selected){
+            this.sprite.x = mouse.getX();
+            this.sprite.y = mouse.getY();
         }
 
     }
@@ -295,10 +297,13 @@ class PlayHand {
     }
 
 
-    SelectUpdate(mouse: Phaser.Input.Pointer) {
+    Update(mouse: Mouse, cardPlace: CardZoneP) {
+
+        let cardSelected = false;
 
         for(let i = 0; i < this.Cards.length; i++) {
             this.Cards[i].onClicked(mouse);
+            this.Cards[i].update(mouse);
         }
     }
 
@@ -514,12 +519,12 @@ class HaggleButton {
         scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0xff0000, roundStarted ? .5 : 1);
     }
 
-    mouseCheck(mouse: Phaser.Input.Pointer): boolean {
+    mouseCheck(mouse: Mouse): boolean {
         const topLeft = [runningWidth * .1 - cardWid / 2, runningHeight / 2 - cardHigh / 2];
         const botRight = [runningWidth * .1 + cardWid / 2, runningHeight / 2 + cardHigh / 2];
 
-        if(topLeft[0] <= mouse.x && botRight[0] >= mouse.x) {
-            if(topLeft[1] <= mouse.y && botRight[1] >= mouse.y) {
+        if(topLeft[0] <= mouse.getX() && botRight[0] >= mouse.getY()) {
+            if(topLeft[1] <= mouse.getX() && botRight[1] >= mouse.getY()) {
                 return true;
             } 
         }
@@ -529,7 +534,7 @@ class HaggleButton {
 
 
 //User Input
-let mouse: Phaser.Input.Pointer;
+let mouse: Mouse;
 let space: Phaser.Input.Keyboard.Key | undefined;
 let spJustPressed = false;
 
@@ -577,7 +582,7 @@ export default class GameScene extends Phaser.Scene {
         this.load.spritesheet('cardF', './assets/CardF_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
         this.load.spritesheet('cardB', './assets/CardB_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
 
-        mouse = this.input.activePointer;
+        mouse = new Mouse(this);
         space = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
     
@@ -613,68 +618,121 @@ export default class GameScene extends Phaser.Scene {
             aiZone.ResetPos();
             playZone.ResetPos();
             haggleBtn.reloadButton(this);
+            endMenu.reloadEndMenu(false);
+            playChips.reload(playBWin);
+            aiChips.reload(aiBWin);
+            tip.reload();
         }
-        
-        // background
-        
-        if(space?.isDown == false) spJustPressed = false;
-        
-        //updates position of clicked card
-        playerHand.SelectUpdate(mouse);
-        
-        //Sets Card if card is over played zone (doesnt work if current round has ended)
-        if(aiZone.cardPlaced == false) {
-            let res = playZone.ActiveCheck(playerHand);
-            if (res) {
-                haggleBtn.reloadButton(this);
+
+        // if set has ended, display the end game screen if necessary
+        if (setEnded) {
+            if (endMenu.backdrop.alpha == 0) {
+                endMenu.reloadEndMenu(false);
             }
 
-            if (!roundStarted && mouse.isDown) {
-                let res = haggleBtn.mouseCheck(mouse);
+            if (mouse.justClicked()) {
+                setEnded = false;
+                endMenu.reloadEndMenu(false);
+                aiChips.reload(aiBWin);
+                playChips.reload(playBWin);
+                await aiHand.DealHand(deck, this);
+                await playerHand.DealHand(deck, this);
+                playerHand.haggled = false;
+                tip.reload("Drag a card\nto the center!", true);
+            }
+        }
+        
+        // if set is running, do normal stuff
+        if (!setEnded) {
+            // background
+            
+            if(space?.isDown == false) spJustPressed = false;
+            
+            //updates position of clicked card
+            playerHand.Update(mouse, playZone);
+            
+            //Sets Card if card is over played zone (doesnt work if current round has ended)
+            if(aiZone.cardPlaced == false) {
+                let res = playZone.ActiveCheck(playerHand);
                 if (res) {
-                    console.log("haggle activated!");
+                    roundStarted = true;
+                    haggleBtn.reloadButton(this);
                 }
-        
-                roundStarted = true;
+    
+                //if haggle button is clicked at the start of round
+                if (!roundStarted && mouse.justClicked()) {
+                    let result = haggleBtn.mouseCheck(mouse);
+                    if (result) {
+                        //console.log("haggle activated!");
+                        await playerHand.Haggle(deck, this);
+                    }
+                }
+            }
+            
+            //if Player Played a card and Ai Has not
+            if(playZone.cardPlaced == true && aiZone.cardPlaced == false) {
+                this.sound.play("cardPutDown");
+                aiZone.PlayCard(aiHand.PlayRand());
+    
+                //Adding played cards to log
+                cardLog.add(playZone);
+                cardLog.add(aiZone);
+            }
+            
+            if(playZone.cardPlaced == true && aiZone.cardPlaced == true) {
+                if (tip.curText != "Press space to\ncontinue.") {
+                    tip.reload("Press space to\ncontinue.", true);
+                }
+
+                if(space?.isDown && spJustPressed == false) {
+                    
+                    if(playZone.compare(aiZone)) {
+                        console.log('Player Won');
+                        playBWin++;
+                        playChips.reload(playBWin);
+                        this.sound.play("win", {detune: 500});
+                        tip.reload("Drag a card\nto the center!", true);
+                    } else{
+                        console.log('AI Won');
+                        aiBWin++;
+                        aiChips.reload(aiBWin);
+                        this.sound.play("win", {detune: -200});
+                        tip.reload("Drag a card\nto the center!", true);
+                    }
+                    
+                    playZone.Reset();
+                    aiZone.Reset();
+                    
+                    spJustPressed = true;
+                }
+            }
+            
+            if(((playerHand.handEmpty == true && aiHand.handEmpty == true) && (playZone.cardPlaced == false && aiZone.cardPlaced == false)) || (playBWin == 3 || aiBWin == 3)) {
+                tip.reload("Tip Display", false);
+                
+                //updating set score
+                if(playBWin > aiBWin){
+                    console.log("Player Won the set!");
+                    playSWin++;
+                    setEnded = true;
+                    endMenu.reloadEndMenu(true);
+                }else{
+                    console.log("Ai Won the set!");
+                    aiSWin++;
+                    setEnded = true;
+                    endMenu.reloadEndMenu(false);
+                }
+
+                playBWin = 0;
+                aiBWin = 0;
+
+                deck.ResetDeck();
+                roundStarted = false;
                 haggleBtn.reloadButton(this);
             }
+            
+            //move cards back to center if not being dragged
+            playerHand.ResetPos();
         }
-        
-        playerHand.PosUpdate(mouse);
-
-        //if Player Played a card and Ai Has not
-        if(playZone.cardPlaced == true && aiZone.cardPlaced == false) {
-            aiZone.PlayCard(aiHand.PlayRand());
-        }
-        
-        if(playZone.cardPlaced == true && aiZone.cardPlaced == true) {
-            if(space?.isDown && spJustPressed == false) {
-                //console.log("Bullshit"); // what is this print statement? i'll add my own twist
-                //console.log("Ratshit");
-                
-                if(playZone.compare(aiZone)) {
-                    console.log('Player Won');
-                } else{
-                    console.log('AI Won');
-                }
-                
-                playZone.Reset();
-                aiZone.Reset();
-                
-                spJustPressed = true;
-            }
-        }
-        
-        if((playerHand.handEmpty == true && aiHand.handEmpty == true) && (playZone.cardPlaced == false && aiZone.cardPlaced == false)) {
-            console.log("EVERYTHING IS EMPTY");
-            aiHand.DealHand(deck, this);
-            playerHand.DealHand(deck, this);
-            roundStarted = false;
-            haggleBtn.reloadButton(this);
-        }
-        
-        //move cards back to center if not being dragged
-        playerHand.ResetPos();
     }
-    
 }
