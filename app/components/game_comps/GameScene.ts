@@ -362,6 +362,7 @@ class PlayHand {
         }
 
         //Adding new cards to hand
+        await sleep(100);
         for(let i = 0; i < 4; i++){
             console.log("adding: ", i);
             this.Cards.push(new ActCard(deck.Draw(), 0, 0, scene, 0));
