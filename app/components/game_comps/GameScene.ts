@@ -153,9 +153,15 @@ class ActCard extends InActCard {
     sprite: Phaser.GameObjects.Image;
     selected: boolean;
 
+    origX: number;
+    origY: number;
+
     //Active Card Constructor (if show back = 0: show face, if show back = 1 cardB[0], else cardB[1])
     constructor(cardInfo: InActCard, xPos: number, yPos: number, scene: Phaser.Scene, showBack: integer) {
         super(cardInfo.suit, cardInfo.val);
+        this.origX = xPos;
+        this.origY = yPos;
+
         this.selected = false;
         this.frntText = 'cardF';
         this.bckText = 'cardB';
@@ -181,15 +187,25 @@ class ActCard extends InActCard {
     onClicked(mouse: Mouse) {
 
         if(mouse.justClicked()) {
-            if(this.selected == true){
-                this.selected = false;
-                return true;
-            }
-            if(mouse.getX() >= this.sprite.x - (cardWid / 2) && mouse.getX() <= this.sprite.x + (cardWid / 2)) {
-                
-                if(mouse.getY() >= this.sprite.y - (cardHigh / 2) && mouse.getY() <= this.sprite.y + (cardHigh / 2)) {
-                    //this.sprite.setPosition(mouse.x, mouse.y);
+            // if(this.selected == true){
+            //     this.selected = false;
+            //     return true;
+            // }
+            const posCheck =
+                mouse.getX() >= this.origX - (cardWid / 2) &&
+                mouse.getX() <= this.origX + (cardWid / 2) &&
+                mouse.getY() >= this.origY - (cardHigh / 2) &&
+                mouse.getY() <= this.origY + (cardHigh / 2);
+
+            if (posCheck) {
+                if (!this.selected) {
                     this.selected = true;
+                    tip.reload("Drag the card\nto the center!", true);
+                }
+            } else {
+                if (this.selected) {
+                    this.selected = false;
+                    tip.reload("Click a card!", true);
                 }
             }
         }
@@ -394,10 +410,12 @@ class PlayHand {
         }
 
         //Adding new cards to hand
+        await sleep(100);
         for(let i = 0; i < 4; i++){
             console.log("adding: ", i);
             this.Cards.push(new ActCard(deck.Draw(), 0, 0, scene, 0));
             gameScene.sound.play("drawCard", {volume: 0.5});
+            this.ResetPos();
             await sleep(100);
         }
     }
@@ -573,26 +591,34 @@ class PlayedLog {
 
 
 class HaggleButton {
+    img;
+
     constructor(scene: Phaser.Scene) {
-        scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0xff0000, roundStarted ? .5 : 1);
+        this.img = scene.add.image(runningWidth * .1, runningHeight / 2, 'haggleChip').setDepth(2);
+        // scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0xff0000, roundStarted ? .5 : 1);
     }
 
     reloadButton(scene: Phaser.Scene) {
+        this.img.setPosition(runningWidth * .1, runningHeight / 2).setAlpha(roundStarted ? .5 : 1);
+
         // draw background BEFORE drawing translucent button
-        scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0x204424, 1);
-        scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0xff0000, roundStarted ? .5 : 1);
+        // scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0x204424, 1);
+        // scene.add.rectangle(runningWidth * .1, runningHeight / 2, cardWid, cardHigh, 0xff0000, roundStarted ? .5 : 1);
     }
 
     mouseCheck(mouse: Mouse): boolean {
-        const topLeft = [runningWidth * .1 - cardWid / 2, runningHeight / 2 - cardHigh / 2];
-        const botRight = [runningWidth * .1 + cardWid / 2, runningHeight / 2 + cardHigh / 2];
+        const radius = 100 / 2; // radius, not diameter!
+        const diff_sq = Math.pow(mouse.getX() - (runningWidth * .1), 2) + Math.pow(mouse.getY() - (runningHeight / 2), 2);
+        return diff_sq < radius * radius;
 
-        if(topLeft[0] <= mouse.getX() && botRight[0] >= mouse.getX()) {
-            if(topLeft[1] <= mouse.getY() && botRight[1] >= mouse.getY()) {
-                return true;
-            } 
-        }
-        return false;
+        // const topLeft = [runningWidth * .1 - cardWid / 2, runningHeight / 2 - cardHigh / 2];
+        // const botRight = [runningWidth * .1 + cardWid / 2, runningHeight / 2 + cardHigh / 2];
+        // if(topLeft[0] <= mouse.x && botRight[0] >= mouse.x) {
+        //     if(topLeft[1] <= mouse.y && botRight[1] >= mouse.y) {
+        //         return true;
+        //     } 
+        // }
+        // return false;
     }
 }
 
@@ -759,6 +785,7 @@ export default class GameScene extends Phaser.Scene {
         this.load.spritesheet('cardF', './assets/CardF_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
         this.load.spritesheet('cardB', './assets/CardB_Sheet.png', {frameWidth: cardWid, frameHeight: cardHigh});
         this.load.image('chip', './assets/chip.png');
+        this.load.image('haggleChip', './assets/bluechip.png');
 
         this.load.audio("drawCard", "./assets/SoundEffects/GP_Draw_2.wav");
         this.load.audio("win", "./assets/SoundEffects/GP_Damage_6.wav");
@@ -821,7 +848,7 @@ export default class GameScene extends Phaser.Scene {
                 await aiHand.DealHand(deck, this);
                 await playerHand.DealHand(deck, this);
                 playerHand.haggled = false;
-                tip.reload("Drag a card\nto the center!", true);
+                tip.reload("Click a card!", true);
             }
         }
         
@@ -848,6 +875,8 @@ export default class GameScene extends Phaser.Scene {
                     if (result) {
                         //console.log("haggle activated!");
                         await playerHand.Haggle(deck, this);
+                        roundStarted = true;
+                        haggleBtn.reloadButton(this);
                     }
                 }
             }
@@ -874,13 +903,13 @@ export default class GameScene extends Phaser.Scene {
                         playBWin++;
                         playChips.reload(playBWin);
                         this.sound.play("win", {detune: 500});
-                        tip.reload("Drag a card\nto the center!", true);
+                        tip.reload("Click a card!", true);
                     } else{
                         console.log('AI Won');
                         aiBWin++;
                         aiChips.reload(aiBWin);
                         this.sound.play("win", {detune: -200});
-                        tip.reload("Drag a card\nto the center!", true);
+                        tip.reload("Click a card!", true);
                     }
                     
                     playZone.Reset();
