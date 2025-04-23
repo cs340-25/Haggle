@@ -373,7 +373,9 @@ class PlayHand {
             if(this.Cards[i].selected == false) {
                 //this.Cards[i].sprite.x = this.crdStrt + ((1+i)* this.crdSpc);
                 this.Cards[i].sprite.x = hndStrt + ((i)* hndSpc);
+                this.Cards[i].origX = hndStrt + ((i)* hndSpc);
                 this.Cards[i].sprite.y = handY;
+                this.Cards[i].origY = handY;
             }
 
         }
