@@ -1,5 +1,9 @@
 # Haggle
 
+<p align="center">
+    <img alt="Haggle Architecture" src="gamePic.png"/>
+</p>
+
 A NextJS, online card game perfect for ruining friendships.
 
 Thank you so much to Olex Mazur over on itch.io for creating the free sound effects that we used.
@@ -7,14 +11,18 @@ Thank you so much to Olex Mazur over on itch.io for creating the free sound effe
 
 ## 1. How to use
 
-Change directories in two terminals to both `/client` and `/game_server`. Follow
-the necessary instructions there to run the corresponding service!
+Simply run the following commands in the root directory of this project:
+```
+pnpm i
+pnpm run dev
+```
 
+Then, open your browser to `http://localhost:3000`!
 
 ## 2. Planned layout
 
 <p align="center">
-    <img alt="Haggle Architecture" src="Haggle_Architecture.png"/>
+    <img alt="Haggle Architecture" src="arch_dark.png"/>
 </p>
 
 
@@ -36,49 +44,7 @@ Here are the planned functionalities for the different routes:
 - `/rules`
     - nav bar to `/` and `/rules`
     - explains the game
-        - plenty of visuals?
 
-- `/play/offline`
-    - user can play a game locally
-    - game screen should take up most of the area
-    - disconnect button in bottom right corner
-    - <b>single player should be implemented first</b>
-
-- `/play/online/[gameCode]`
-    - `gameCode` is UNIQUE, case-insensitive string of 6 letters (a-z)
-    - use can play a game online
-    - game screen should take up most of the area
-    - disconnect button in bottom right corner
-
-
-### ii. Models
-
-We'll be using Sequelize as the ORM, but here's the lobby model:
-
-> <hr>
-> <h3>Lobby</h3>
->
-> | Field | Datatype | Constraints | Justification |
-> | -------- | ------- | ------- | ----- |
-> | `code` | `string` | unique, required | Needed for API and page access |
-> | `numPlayers` | `number` | required | Number of players in lobby |
-> | `private` | `boolean` | required | Restrict "random play" button search |
-> | `state` | `string` | required, CANNOT be empty | Current state of lobby |
-
-
-### iii. API Routes
-
-- `/lobbies`
-    - GET for getting all public lobbies
-    - POST for creating a new lobby
-
-- `/lobbies/gameCode`
-    - join *any* lobby given code
-    - GET for getting state of lobby
-    - PUT for updating state of lobby OR updating number of players
-    - DELETE for deleting a lobby
-
-> [!NOTE]
-> More details regarding communication between the websocket server and
-> NextJS application will be specified later into development. The same
-> goes for interactions between the websocket server and the database.
+- `/play`
+    - Same nav bar
+    - Actual Phaser game component
